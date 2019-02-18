@@ -13,9 +13,9 @@
     <SupportedDataView id="cmdi" delivery-policy="need-to-request">application/x-cmdi+xml</SupportedDataView>
   </SupportedDataViews>
   <SupportedLayers>
-    <SupportedLayer id="word" result-id="http://ilc4clarin.ilc.cnr.it/services/fcs/layer/word">text</SupportedLayer>
-    <SupportedLayer id="lemma" result-id="http://ilc4clarin.ilc.cnr.it/services/fcs/layer/lemma">lemma</SupportedLayer>
-    <SupportedLayer id="pos" result-id="http://ilc4clarin.ilc.cnr.it/services/fcs/layer/pos">pos</SupportedLayer>
+    <SupportedLayer id="word" result-id="http://spraakbanken.gu.se/ns/fcs/layer/word">text</SupportedLayer>
+    <SupportedLayer id="lemma" result-id="http://spraakbanken.gu.se/ns/fcs/layer/lemma">lemma</SupportedLayer>
+    <SupportedLayer id="pos" result-id="http://spraakbanken.gu.se/ns/fcs/layer/pos">pos</SupportedLayer>
   </SupportedLayers>
   <Resources>
     <Resource pid="hdl:10794/sbkorpusar">
