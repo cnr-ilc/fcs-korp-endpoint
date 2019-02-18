@@ -4,12 +4,12 @@
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>se.gu.spraakbanken.fcs.endpoint.korp</groupId>
-  <artifactId>fcs-korp-endpoint</artifactId>
+  <artifactId>ilc4clarin-fcs-korp-endpoint</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>A Korp CLARIN FCS 2.0 endpoint</name>
+  <name>The ILC4CLARIN Korp Based CLARIN FCS 2.0 endpoint</name>
   <description>
-    A Korp CLARIN FCS endpoint implementation as an example of a CLARIN FCS 2.0 endpoint.
+    The ILC4CLARIN Korp Based CLARIN FCS endpoint implementation.
   </description>
 
   <properties>
