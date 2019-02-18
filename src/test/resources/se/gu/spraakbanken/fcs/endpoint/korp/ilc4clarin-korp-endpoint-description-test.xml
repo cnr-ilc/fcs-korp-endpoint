@@ -13,9 +13,9 @@
     <SupportedDataView id="cmdi" delivery-policy="need-to-request">application/x-cmdi+xml</SupportedDataView>
   </SupportedDataViews>
   <SupportedLayers>
-    <SupportedLayer id="word" result-id="http://ilc4clarin.ilc.cnr.it/services/fcs/layer/word">text</SupportedLayer>
-    <SupportedLayer id="lemma" result-id="http://ilc4clarin.ilc.cnr.it/services/fcs/layer/lemma">lemma</SupportedLayer>
-    <SupportedLayer id="pos" result-id="http://ilc4clarin.ilc.cnr.it/services/fcs/layer/pos">pos</SupportedLayer>
+    <SupportedLayer id="word" result-id="http://spraakbanken.gu.se/ns/fcs/layer/word">text</SupportedLayer>
+    <SupportedLayer id="lemma" result-id="http://spraakbanken.gu.se/ns/fcs/layer/lemma">lemma</SupportedLayer>
+    <SupportedLayer id="pos" result-id="http://spraakbanken.gu.se/ns/fcs/layer/pos">pos</SupportedLayer>
   </SupportedLayers>
   <Resources>
     <Resource pid="hdl:10794/sbkorpusar">
@@ -26,13 +26,16 @@
       <LandingPageURI>https://spraakbanken.gu.se/resurser/corpus</LandingPageURI>
       <Languages>
         <Language>swe</Language>
-	<!--Language>fao</Language>
+	<Language>fao</Language>
 	<Language>nld</Language>
 	<Language>som</Language>
-	<Language>spa</Language-->
+	<Language>spa</Language>
       </Languages>
-      <AvailableDataViews ref="hits adv"/>
-      <AvailableLayers ref="word lemma pos"/>
+      <AvailableDataViews ref="hits"/>
+      <AvailableDataViews ref="adv"/>
+      <AvailableLayers ref="word"/>
+      <AvailableLayers ref="lemma"/>
+      <AvailableLayers ref="pos"/>
       <Resources>
 	<Resource pid="hdl:10794/sbmoderna">
 	  <Title xml:lang="sv">Språkbankens moderna korpusar</Title>
@@ -43,8 +46,11 @@
 	  <Languages>
             <Language>swe</Language>
 	  </Languages>
-	  <AvailableDataViews ref="hits adv"/>
-	  <AvailableLayers ref="word lemma pos"/>
+	  <AvailableDataViews ref="hits"/>
+	  <AvailableDataViews ref="adv"/>
+	  <AvailableLayers ref="word"/>
+	  <AvailableLayers ref="lemma"/>
+	  <AvailableLayers ref="pos"/>
 	  <Resources>
 	    <Resource pid="hdl:10794/suc">
 	      <Title xml:lang="sv">SUC-korpusen</Title>
@@ -55,8 +61,11 @@
 	      <Languages>
 		<Language>swe</Language>
 	      </Languages>
-	      <AvailableDataViews ref="hits adv"/>
-	      <AvailableLayers ref="word lemma pos"/>
+	      <AvailableDataViews ref="hits"/>
+	      <AvailableDataViews ref="adv"/>
+	      <AvailableLayers ref="word"/>
+	      <AvailableLayers ref="lemma"/>
+	      <AvailableLayers ref="pos"/>
 	    </Resource>
 	  </Resources>
 	</Resource>
