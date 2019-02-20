@@ -18,19 +18,100 @@
         <SupportedLayer id="pos" result-id="http://ilc4clarin.ilc.cnr.it/services/fcs/layer/pos">pos</SupportedLayer>
     </SupportedLayers>
     <Resources>
-        <Resources>
-            <Resource pid="hdl:20.500.11752/corpora">
-                <Title xml:lang="it">Un estratto da Corpus PAROLE</Title>
-                <Title xml:lang="en">PAROLE Corpus Sample</Title>
-                <Description xml:lang="it">Un estratto da Corpus PAROLE. Annotato in CONLL con UD17</Description>
-                <Description xml:lang="en">A sample from Corpus PAROLE. Format: CONLL POS:  UD17.</Description>
-                <LandingPageURI>http://ilc4clarin.ilc.cnr.it/services/fcs/corpus</LandingPageURI>
-                <Languages>
-                    <Language>ita</Language>
-                </Languages>
-                <AvailableDataViews ref="hits"/>
-                <AvailableLayers ref="word"/>                   
-            </Resource>
-        </Resources>
+        <Resource pid="hdl:20.500.11752/corpora">
+            <Title xml:lang="it">Corpora offerti da ILC4CLARIN</Title>
+            <Title xml:lang="en">ILC4CLARIN offered corpora</Title>
+      
+            <LandingPageURI>http://ilc4clarin.ilc.cnr.it/corpora</LandingPageURI>
+            <Languages>
+                <Language>ita</Language>
+                <!--Language>fao</Language>
+                <Language>nld</Language>
+                <Language>som</Language>
+                <Language>spa</Language-->
+            </Languages>
+            <AvailableDataViews ref="hits adv"/>
+            <AvailableLayers ref="word lemma pos"/>
+            <Resources>
+                <Resource pid="hdl:20.500.11752/parole">
+                    <Title xml:lang="it">ILC4CLARIN Parole</Title>
+                    <Title xml:lang="en">ILC4CLARIN Parole corpus</Title>
+                    <Description xml:lang="it">ILC4CLARIN Parole. Estratto da...</Description>
+                    <Description xml:lang="en">ILC4CLARIN Parole corpus. Extracted from...</Description>
+                    <LandingPageURI>http://ilc4clarin.ilc.cnr.it/corpora/parole</LandingPageURI>
+                    <Languages>
+                        <Language>ita</Language>
+                    </Languages>
+                    <AvailableDataViews ref="hits adv"/>
+                    <AvailableLayers ref="word lemma pos"/>
+<!--                    <Resources>
+                        <Resource pid="hdl:10794/suc">
+                            <Title xml:lang="sv">SUC-korpusen</Title>
+                            <Title xml:lang="en">The SUC corpus</Title>
+                            <Description xml:lang="sv">Stockholm-Umeå-korpusen hos Språkbanken.</Description>
+                            <Description xml:lang="en">The Stockholm-Umeå corpus at Språkbanken.</Description>
+                            <LandingPageURI>https://spraakbanken.gu.se/resurser/suc</LandingPageURI>
+                            <Languages>
+                                <Language>swe</Language>
+                            </Languages>
+                            <AvailableDataViews ref="hits adv"/>
+                            <AvailableLayers ref="word lemma pos"/>
+                        </Resource>
+                    </Resources>-->
+                </Resource>
+                <Resource pid="hdl:20.500.11752/riccardo">
+                    <Title xml:lang="it">ILC4CLARIN Riccardo</Title>
+                    <Title xml:lang="en">ILC4CLARIN Riccardo corpus</Title>
+                    <Description xml:lang="it">ILC4CLARIN Riccardo Estratto da...</Description>
+                    <Description xml:lang="en">ILC4CLARIN Riccardo corpus. Extracted from...</Description>
+                    <LandingPageURI>http://ilc4clarin.ilc.cnr.it/corpora/riccardo</LandingPageURI>
+                    <Languages>
+                        <Language>ita</Language>
+                    </Languages>
+                    <AvailableDataViews ref="hits adv"/>
+                    <AvailableLayers ref="word lemma pos"/>
+<!--                    <Resources>
+                        <Resource pid="hdl:10794/suc">
+                            <Title xml:lang="sv">SUC-korpusen</Title>
+                            <Title xml:lang="en">The SUC corpus</Title>
+                            <Description xml:lang="sv">Stockholm-Umeå-korpusen hos Språkbanken.</Description>
+                            <Description xml:lang="en">The Stockholm-Umeå corpus at Språkbanken.</Description>
+                            <LandingPageURI>https://spraakbanken.gu.se/resurser/suc</LandingPageURI>
+                            <Languages>
+                                <Language>swe</Language>
+                            </Languages>
+                            <AvailableDataViews ref="hits adv"/>
+                            <AvailableLayers ref="word lemma pos"/>
+                        </Resource>
+                    </Resources>-->
+                </Resource>
+                <Resource pid="hdl:20.500.11752/testcorpus">
+                    <Title xml:lang="it">ILC4CLARIN testcorpus</Title>
+                    <Title xml:lang="en">ILC4CLARIN testcorpus corpus</Title>
+                    <Description xml:lang="it">ILC4CLARIN testcorpus Estratto da...</Description>
+                    <Description xml:lang="en">ILC4CLARIN testcorpus corpus. Extracted from...</Description>
+                    <LandingPageURI>http://ilc4clarin.ilc.cnr.it/corpora/testcorpuse</LandingPageURI>
+                    <Languages>
+                        <Language>ita</Language>
+                    </Languages>
+                    <AvailableDataViews ref="hits adv"/>
+                    <AvailableLayers ref="word lemma pos"/>
+<!--                    <Resources>
+                        <Resource pid="hdl:10794/suc">
+                            <Title xml:lang="sv">SUC-korpusen</Title>
+                            <Title xml:lang="en">The SUC corpus</Title>
+                            <Description xml:lang="sv">Stockholm-Umeå-korpusen hos Språkbanken.</Description>
+                            <Description xml:lang="en">The Stockholm-Umeå corpus at Språkbanken.</Description>
+                            <LandingPageURI>https://spraakbanken.gu.se/resurser/suc</LandingPageURI>
+                            <Languages>
+                                <Language>swe</Language>
+                            </Languages>
+                            <AvailableDataViews ref="hits adv"/>
+                            <AvailableLayers ref="word lemma pos"/>
+                        </Resource>
+                    </Resources>-->
+                </Resource>
+            </Resources>
+        </Resource>
     </Resources>
 </EndpointDescription>

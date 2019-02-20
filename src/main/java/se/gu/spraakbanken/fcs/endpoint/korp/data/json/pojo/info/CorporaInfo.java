@@ -16,9 +16,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Properties;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -144,18 +144,64 @@ public class CorporaInfo {
     }
 
     /**
-     *
+     * Added the property file
      * @param corpora The List&lt;String&gt; corpora values.
      *
      * @return a CorporaInfo instance for all corpora
      */
     public static CorporaInfo getCorporaInfo(final List<String> corpora) {
+        PropertiesLoader pl;// = new PropertiesLoader("/tmp/config-test.properties");
+        pl=PropertiesLoader.getInstance();
         ObjectMapper mapper = new ObjectMapper();
-
+        
+        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getCorporaInfo() "+pl.getLib());
 	CorporaInfo ci = null;
-	final String wsString ="https://spraakbanken.gu.se/ws/korp/v6/?";
-	final String queryString = "command=info&corpus=";
+//	final String wsString ="https://spraakbanken.gu.se/ws/korp/v6/?";
+//	final String queryString = "command=info&corpus=";
+        final String wsString ="http://pcdelgratta.ilc.cnr.it:90/"; //http://pcdelgratta.ilc.cnr.it:90/info?corpus=RICCARDO
+	final String queryString = "info?&corpus=";
 	//"ROMI,PAROLE";
+        System.out.println("STICA "+wsString + queryString);
+	final String corporaValues = getCorpusParameterValues(corpora);
+        try {
+	    URL korp = new URL(wsString + queryString + corporaValues);
+
+            ci = mapper.reader(CorporaInfo.class).readValue(korp.openStream());
+        } catch (JsonParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+	return ci;
+    }
+    
+    /**
+     * Added the property file
+     * @param corpora The List&lt;String&gt; corpora values.
+     *
+     * @return a CorporaInfo instance for all corpora
+     */
+    public static CorporaInfo getCorporaInfo(Properties prop, final List<String> corpora) {
+        PropertiesLoader pl;// = new PropertiesLoader("/tmp/config-test.properties");
+        pl=PropertiesLoader.getInstance();
+        ObjectMapper mapper = new ObjectMapper();
+        
+        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getCorporaInfo() "+pl.getLib());
+	CorporaInfo ci = null;
+//	final String wsString ="https://spraakbanken.gu.se/ws/korp/v6/?";
+//	final String queryString = "command=info&corpus=";
+        final String wsString ="http://pcdelgratta.ilc.cnr.it:90/"; //http://pcdelgratta.ilc.cnr.it:90/info?corpus=RICCARDO
+	final String queryString = "info?&corpus=";
+	//"ROMI,PAROLE";
+        System.out.println("STICA "+wsString + queryString);
 	final String corporaValues = getCorpusParameterValues(corpora);
         try {
 	    URL korp = new URL(wsString + queryString + corporaValues);

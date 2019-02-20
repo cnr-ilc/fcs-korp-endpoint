@@ -15,6 +15,10 @@
       <param-value>250</param-value>
     </init-param>
     <init-param>
+      <param-name>eu.clarin.sru.server.propertyFile</param-name>
+      <param-value>/tmp/config-test.properties</param-value>
+    </init-param>
+    <init-param>
       <param-name>eu.clarin.sru.server.maximumRecords</param-name>
       <param-value>1000</param-value>
     </init-param>

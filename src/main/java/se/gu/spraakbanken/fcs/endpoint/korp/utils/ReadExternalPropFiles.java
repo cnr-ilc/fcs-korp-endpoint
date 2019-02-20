@@ -5,6 +5,7 @@
  */
 package se.gu.spraakbanken.fcs.endpoint.korp.utils;
 
+import se.gu.spraakbanken.fcs.endpoint.korp.utils.*;
 import eu.clarin.sru.server.SRUConfigException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -39,7 +40,7 @@ public class ReadExternalPropFiles {
            
             
             prop.load(inputStream);
-            System.out.println("STICA TEST se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngineTest.getPropertiesFromConfig() " + prop.getProperty("korpPort"));
+            System.out.println("STICA PROD se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.getPropertiesFromConfig() " + prop.getProperty("korpPort"));
             //System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngineTest.getPropertiesFromConfig() " + System.getProperty("user.dir"));
             
 
