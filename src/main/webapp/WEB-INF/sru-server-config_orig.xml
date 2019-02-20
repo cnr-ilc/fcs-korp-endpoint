@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <endpoint-config xmlns="http://www.clarin.eu/sru-server/1.0/">
     <databaseInfo>
-        <title xml:lang="it">Risorse Linguistiche ospitate nel centro ILC4CLARIN</title>
-        <title xml:lang="en" primary="true">The ILC4CLARIN Language Resources</title>
-        <description xml:lang="it">Ricerca nell'archivio delle risorse linguistiche del centro ILC4CLARIN</description>
-        <description xml:lang="en" primary="true">Search in the ILC4CLARIN Language Resources.</description>
-        <author xml:lang="it">ILC4CLARIN eXist-Db</author>
-        <author xml:lang="en" primary="true">ILC4CLARIN eXist-Db</author>
+        <title xml:lang="se">Språkbankens korpusar</title>
+        <title xml:lang="en" primary="true">The Språkbanken corpora</title>
+        <description xml:lang="se">Sök i Språkbankens korpusar.</description>
+        <description xml:lang="en" primary="true">Search in the Språkbanken corpora.</description>
+        <author xml:lang="en">Språkbanken (The Swedish Language Bank)</author>
+        <author xml:lang="se" primary="true">Språkbanken</author>
     </databaseInfo>
     
     <indexInfo>
         <set name="fcs" identifier="http://clarin.eu/fcs/resource">
-            <title xml:lang="it">Clarin Ricerca di Contenuto</title>
+            <title xml:lang="se">Clarins innehållssökning</title>
             <title xml:lang="en" primary="true">CLARIN Content Search</title>
         </set>
         <index search="true" scan="false" sort="false">

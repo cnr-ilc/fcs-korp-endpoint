@@ -34,7 +34,7 @@
       <AvailableDataViews ref="hits adv"/>
       <AvailableLayers ref="word lemma pos"/>
       <Resources>
-	<Resource pid="hdl:10794/sbmoderna"> <!-- hdl:20.500.11752/parole -->
+	<Resource pid="hdl:10794/sbmoderna">
 	  <Title xml:lang="sv">Språkbankens moderna korpusar</Title>
 	  <Title xml:lang="en">The Språkbanken modern corpora</Title>
 	  <Description xml:lang="sv">De moderna korpusarna hos Språkbanken.</Description>
