@@ -85,7 +85,7 @@
                         </Resource>
                     </Resources>-->
                 </Resource>
-                <Resource pid="hdl:20.500.11752/testcorpus">
+<!--                <Resource pid="hdl:20.500.11752/testcorpus">
                     <Title xml:lang="it">ILC4CLARIN testcorpus</Title>
                     <Title xml:lang="en">ILC4CLARIN testcorpus corpus</Title>
                     <Description xml:lang="it">ILC4CLARIN testcorpus Estratto da...</Description>
@@ -96,7 +96,7 @@
                     </Languages>
                     <AvailableDataViews ref="hits adv"/>
                     <AvailableLayers ref="word lemma pos"/>
-<!--                    <Resources>
+                    <Resources>
                         <Resource pid="hdl:10794/suc">
                             <Title xml:lang="sv">SUC-korpusen</Title>
                             <Title xml:lang="en">The SUC corpus</Title>
@@ -109,8 +109,8 @@
                             <AvailableDataViews ref="hits adv"/>
                             <AvailableLayers ref="word lemma pos"/>
                         </Resource>
-                    </Resources>-->
-                </Resource>
+                    </Resources>
+                </Resource>-->
             </Resources>
         </Resource>
     </Resources>
