@@ -52,6 +52,7 @@ import se.gu.spraakbanken.fcs.endpoint.korp.cqp.FCSToCQPConverter;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.ServiceInfo;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.query.Query;
+import se.gu.spraakbanken.fcs.endpoint.korp.utils.ManageProperties;
 import se.gu.spraakbanken.fcs.endpoint.korp.utils.ReadExternalPropFiles;
 
 /**
@@ -59,6 +60,20 @@ import se.gu.spraakbanken.fcs.endpoint.korp.utils.ReadExternalPropFiles;
  *
  */
 public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
+
+    /**
+     * @return the keseProp
+     */
+    public Properties getKeseProp() {
+        return keseProp;
+    }
+
+    /**
+     * @param keseProp the keseProp to set
+     */
+    public void setKeseProp(Properties keseProp) {
+        this.keseProp = keseProp;
+    }
 
     private static final String X_FCS_ENDPOINT_DESCRIPTION
             = "x-fcs-endpoint-description";
@@ -73,6 +88,9 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
     public static final String RESOURCE_INVENTORY_URL
             = "se.gu.spraakbanken.fcs.korp.sru.resourceInventoryURL";
 
+    
+    private Properties keseProp=new Properties();
+    
     protected EndpointDescription createEndpointDescription(
             ServletContext context, SRUServerConfig config,
             Map<String, String> params) throws SRUConfigException {
@@ -80,7 +98,7 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
             URL url = null;
             String riu = params.get(RESOURCE_INVENTORY_URL);
             if ((riu == null) || riu.isEmpty()) {
-                url = context.getResource("/WEB-INF/endpoint-description.xml");
+                url = context.getResource("/WEB-INF/ilc4clarin-korp-endpoint-description.xml");
                 LOG.debug("using bundled 'endpoint-description.xml' file");
             } else {
                 url = new File(riu).toURI().toURL();
@@ -92,6 +110,7 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
             throw new SRUConfigException("Malformed URL for initializing resource info inventory", mue);
         }
     }
+    
 
     /**
      * Initialize the search engine. This initialization should be tailored
@@ -128,7 +147,7 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
             Map<String, String> params) throws SRUConfigException {
         Properties prop=new Properties();
         LOG.info("KorpEndpointSearchEngine::doInit {}", config.getPort());
-        System.err.println("STICA PARAMS" + " " + params);
+        LOG.debug("Config Parameters" + " " + params);
         ReadExternalPropFiles read = new ReadExternalPropFiles();
         try {
             //Properties prop = ReadExternalPropFiles.getPropertyFile(System.getProperty("user.dir") + "/target/test-classes/se/gu/spraakbanken/fcs/endpoint/korp/config-test.properties");
@@ -138,8 +157,9 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
             throw new SRUConfigException(e.getMessage());
             //e.printStackTrace();
         }
+        setKeseProp(prop);
         List<String> openCorpora = ServiceInfo.getIlc4ClarinCorpora(prop);
-        openCorporaInfo = CorporaInfo.getCorporaInfo(openCorpora);
+        openCorporaInfo = CorporaInfo.getIlc4ClarinCorporaInfo(prop,openCorpora);
     }
 
     /**
@@ -375,6 +395,7 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
     public SRUSearchResultSet search(SRUServerConfig config,
             SRURequest request, SRUDiagnosticList diagnostics)
             throws SRUException {
+        
         String query;
         if (request.isQueryType(Constants.FCS_QUERY_TYPE_CQL)) {
             /*
@@ -445,6 +466,40 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
             // using URLConnection.getInputStream() instead. /ljo
             URLConnection connection = korp.openConnection();
             return mapper.reader(Query.class).readValue(connection.getInputStream());
+        } catch (JsonParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    protected Query makeIlc4ClarinQuery(Properties prop, final String cqpQuery, CorporaInfo openCorporaInfo, final int startRecord, final int maximumRecords) {
+        ObjectMapper mapper = new ObjectMapper();
+        String wsString = ManageProperties.createKorpUrl(prop);//"https://spraakbanken.gu.se/ws/korp/v6/?";
+        String queryString = "query?defaultcontext=1+sentence&show=msd,lemma&cqp=";
+        String startParam = "&start=" + (startRecord == 1 ? 0 : startRecord - 1);
+        String endParam = "&end=" + (maximumRecords == 0 ? 250 : startRecord - 1 + maximumRecords - 1);
+        String corpusParam = "&corpus=";
+        //"SUC2";
+        String corpusParamValues = CorporaInfo.getCorpusParameterValues(openCorporaInfo.getCorpora().keySet());
+        try {
+            URL korp = new URL(wsString + queryString + URLEncoder.encode(cqpQuery, "UTF-8") + startParam + endParam + corpusParam + corpusParamValues);
+            // mapper.reader(Query.class).readValue(korp.openStream());
+            // truncates the query string 
+            // using URLConnection.getInputStream() instead. /ljo
+            URLConnection connection = korp.openConnection();
+            
+           LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() "+korp.toString());
+            return mapper.readerFor(Query.class).readValue(connection.getInputStream());
         } catch (JsonParseException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

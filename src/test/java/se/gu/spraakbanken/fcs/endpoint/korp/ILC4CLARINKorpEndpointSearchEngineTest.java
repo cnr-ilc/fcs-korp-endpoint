@@ -6,11 +6,9 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
@@ -18,44 +16,29 @@ import javax.xml.stream.XMLStreamException;
 
 import eu.clarin.sru.server.CQLQueryParser;
 import eu.clarin.sru.server.SRUConfigException;
-import eu.clarin.sru.server.SRUConstants;
 import eu.clarin.sru.server.SRUDiagnosticList;
 import eu.clarin.sru.server.SRUException;
 import eu.clarin.sru.server.SRUQueryParserRegistry;
-import eu.clarin.sru.server.SRURequest;
-import eu.clarin.sru.server.SRUScanResultSet;
-import eu.clarin.sru.server.SRUSearchResultSet;
 import eu.clarin.sru.server.SRUServerConfig;
 import eu.clarin.sru.server.SRUVersion;
 import eu.clarin.sru.server.utils.SRUServerServlet;
-import eu.clarin.sru.server.fcs.DataView;
 import eu.clarin.sru.server.fcs.EndpointDescription;
-import eu.clarin.sru.server.fcs.Layer;
 import eu.clarin.sru.server.fcs.ResourceInfo;
 import eu.clarin.sru.server.fcs.FCSQueryParser;
-import eu.clarin.sru.server.fcs.SimpleEndpointSearchEngineBase;
-import eu.clarin.sru.server.fcs.parser.Expression;
-import eu.clarin.sru.server.fcs.parser.Operator;
-import eu.clarin.sru.server.fcs.parser.QueryNode;
-import eu.clarin.sru.server.fcs.parser.QuerySegment;
-import eu.clarin.sru.server.fcs.utils.SimpleEndpointDescription;
 import eu.clarin.sru.server.fcs.utils.SimpleEndpointDescriptionParser;
 import java.util.Properties;
 
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.testing.ServletTester;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import se.gu.spraakbanken.fcs.endpoint.korp.cqp.FCSToCQPConverter;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.*;
@@ -85,11 +68,11 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
             assertEquals("localhost", prop.getProperty("serverUrl"));
             assertEquals("8080", prop.getProperty("serverPort"));
             assertEquals("True", prop.getProperty("useServerPort"));
-            
+
             assertEquals("pcdelgratta.ilc.cnr.it", prop.getProperty("korpUrl"));
             assertEquals("90", prop.getProperty("korpPort"));
             assertEquals("True", prop.getProperty("useKorpPort"));
-            
+
             assertEquals("True", prop.getProperty("isUD"));
 
         } catch (MalformedURLException mue) {
@@ -111,7 +94,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
 
         tester = new ServletTester();
         //tester.setContextPath("/");
-       
+
         tester.setContextPath("http://localhost:8082/sru-server");
         tester.setResourceBase("src/main/webapp");
         tester.setClassLoader(SRUServerServlet.class.getClassLoader());
@@ -161,17 +144,25 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
 
         config = SRUServerConfig.parse(params, url);
         kese = new KorpEndpointSearchEngine();
-        System.out.println("config.getBaseUrl() "+config.getBaseUrl());
-        System.out.println("config.getDatabase() "+config.getDatabase());
+        System.out.println("config.getBaseUrl() " + config.getBaseUrl());
+        System.out.println("config.getDatabase() " + config.getDatabase());
 
         //System.out.println(holder.getServlet().getServletInfo());
         kese.doInit(config, new SRUQueryParserRegistry.Builder().register(new FCSQueryParser()), params);
-        System.out.println("****kese.getCorporaInfo()****"+kese.getCorporaInfo());
-        System.out.println("****kese.getCorporaInfo()****"+kese.getCorporaInfo().getCorpora());
-        System.out.println("****kese.getCorporaInfo()****"+kese.getCorporaInfo());
+        System.out.println("****kese.getCorporaInfo()****" + kese.getCorporaInfo());
+        System.out.println("****kese.getCorporaInfo()****" + kese.getCorporaInfo().getCorpora());
+        System.out.println("****kese.getCorporaInfo()****" + kese.getCorporaInfo());
         assertNotNull(kese.getCorporaInfo());
         assertNotNull(kese.getCorporaInfo().getTime());
-        //assertNotNull(kese.getCorporaInfo().getCorpus("PAROLE"));
+        
+
+        for (String key : kese.getCorporaInfo().getCorpora().keySet()) {
+             
+             Corpus c = kese.getCorporaInfo().getCorpora().get(key);
+             System.out.println("Corpus with key " + key +" has " +c.getAttrs().getP().toString());
+        }
+
+      
     }
 
     @Test
@@ -196,45 +187,45 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         assertEquals("http://ilc4clarin.ilc.cnr.it/services/fcs/layer/word", sed.getSupportedLayers().get(0).getResultId().toString());
         assertEquals("lemma", sed.getSupportedLayers().get(1).getType().toString());
     }
+
     @Test
-    public void listResourcesFromPid()throws SRUException{
-        String pid="hdl:20.500.11752/corpora";//hdl:20.500.11752/corpora";
-         List<ResourceInfo> riList = sed.getResourceList(pid);
-         for (ResourceInfo ri : riList){
-             if (ri.hasSubResources()){
-                 List<ResourceInfo> risList = ri.getSubResources();
-                 for (ResourceInfo sri : risList){
-                     System.out.println("\t\t\tBBBB sri with PID "+sri.getPid()+ " has title "+sri.getTitle());
-                 }
-             } else {
-                System.out.println("\t\t\tBBBB ResourceInfo "+ri.getPid()+ " has no subserouces");
-             }
-             
-             
-         }
+    public void listResourcesFromPid() throws SRUException {
+        String pid = "hdl:20.500.11752/corpora";//hdl:20.500.11752/corpora";
+        List<ResourceInfo> riList = sed.getResourceList(pid);
+        for (ResourceInfo ri : riList) {
+            if (ri.hasSubResources()) {
+                List<ResourceInfo> risList = ri.getSubResources();
+                for (ResourceInfo sri : risList) {
+                    System.out.println("(Sub)ResourceInfo with PID " + sri.getPid() + " has title " + sri.getTitle());
+                }
+            } else {
+                System.out.println("ResourceInfo " + ri.getPid() + " has no subserouces");
+            }
+
+        }
     }
-//    @Test
-//    public void getResourcesFromDescription() throws SRUException {
-//        //List<ResourceInfo> riList = sed.getResourceList("hdl:20.500.11752/parole"); //hdl:10794/sbmoderna
-//        List<ResourceInfo> riList = sed.getResourceList("hdl:20.500.11752/corpora");
-//        if (riList == null) {
-//            
-//            System.out.println("\t\t\tAAAA NULL ");
-//        } else {
-//            System.out.println("\t\t\tAAAA NOT NULL " + riList.get(0).getTitle());
-//            System.out.println("\t\t\tAAAA NOT NULL " + riList.toString());
-//        }
-////        assertEquals("hits", riList.get(0).getAvailableDataViews().get(0).getIdentifier());
-////        assertEquals("SEND_BY_DEFAULT", riList.get(0).getAvailableDataViews().get(0).getDeliveryPolicy().toString());
-////        assertEquals("application/x-clarin-fcs-hits+xml", riList.get(0).getAvailableDataViews().get(0).getMimeType());
-////        assertEquals("https://spraakbanken.gu.se/resurser/suc", riList.get(0).getLandingPageURI());
-////        assertTrue(riList.get(0).hasAvailableLayers());
-////        assertEquals("word", riList.get(0).getAvailableLayers().get(0).getId());
-////        assertEquals("text", riList.get(0).getAvailableLayers().get(0).getType());
-////        assertNull(riList.get(0).getAvailableLayers().get(0).getQualifier());
-////        assertEquals("ita", riList.get(0).getLanguages().get(0));
-////        assertFalse(riList.get(0).hasSubResources());
-//    }
+    @Test
+    public void getResourcesFromDescription() throws SRUException {
+        //List<ResourceInfo> riList = sed.getResourceList("hdl:20.500.11752/parole"); //hdl:10794/sbmoderna
+        List<ResourceInfo> riList = sed.getResourceList("hdl:20.500.11752/corpora");
+        if (riList == null) {
+            
+            System.out.println("\t\t\tAAAA NULL ");
+        } else {
+            System.out.println("\t\t\tAAAA NOT NULL " + riList.get(0).getTitle());
+            System.out.println("\t\t\tAAAA NOT NULL " + riList.toString());
+        }
+        assertEquals("hits", riList.get(0).getAvailableDataViews().get(0).getIdentifier());
+        assertEquals("SEND_BY_DEFAULT", riList.get(0).getAvailableDataViews().get(0).getDeliveryPolicy().toString());
+        assertEquals("application/x-clarin-fcs-hits+xml", riList.get(0).getAvailableDataViews().get(0).getMimeType());
+        assertEquals("http://ilc4clarin.ilc.cnr.it/corpora/parole", riList.get(0).getLandingPageURI());
+        assertTrue(riList.get(0).hasAvailableLayers());
+        assertEquals("word", riList.get(0).getAvailableLayers().get(0).getId());
+        assertEquals("text", riList.get(0).getAvailableLayers().get(0).getType());
+        assertNull(riList.get(0).getAvailableLayers().get(0).getQualifier());
+        assertEquals("ita", riList.get(0).getLanguages().get(0));
+        assertFalse(riList.get(0).hasSubResources());
+    }
 
     @Test
     public void convertCQL() throws SRUException {
@@ -331,7 +322,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
     }
 
     @Test
-    @Ignore
+    //@Ignore
     public void convertFCSRegexLiteral() throws SRUException {
         Map<String, String> params = new HashMap<String, String>();
         final String query = "[word = '?'/l & pos = 'PUNCT'] ";
@@ -377,11 +368,13 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         kese.doInit(config, new SRUQueryParserRegistry.Builder().register(new FCSQueryParser()), params);
         //SRURequest request = new SRURequestImpl(config, queryParsers, new HttpServletRequestWrapper());
         //SRUSearchResultSet ssrs = kese.search(config, request, diagnostics);
+        Properties prop = kese.getKeseProp();
         CorporaInfo openCorporaInfo = kese.getCorporaInfo();
-        final String query = "[word = 'och'][pos = 'NOUN']";
-        final String cqpQuery = "[word = 'och'][pos = 'NN']";
-
-        Query queryRes = kese.makeQuery(cqpQuery, openCorporaInfo, 0, 25);
+        final String query = "[word = 'trasformato'][pos = 'VERB']";
+        final String cqpQuery = "[word = \"trasformato\"]"; //[pos = 'VERB']";
+        //params
+        //Query queryRes = kese.makeQuery(cqpQuery, openCorporaInfo, 0, 25);
+        Query queryRes = kese.makeIlc4ClarinQuery(prop, cqpQuery, openCorporaInfo, 1, 250);
         KorpSRUSearchResultSet kssrs = new KorpSRUSearchResultSet(config, diagnostics, queryRes, query, openCorporaInfo);
         StringWriter sw = new StringWriter();
         XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newFactory();

@@ -21,6 +21,9 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import se.gu.spraakbanken.fcs.endpoint.korp.utils.ManageProperties;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -31,8 +34,6 @@ import java.util.Properties;
 })
 
 public class ServiceInfo {
-
-   
 
     @JsonProperty("corpora")
     private List<String> corpora = new ArrayList<String>();
@@ -48,6 +49,9 @@ public class ServiceInfo {
     private static final List<String> MODERN_CORPORA = Collections.unmodifiableList(Arrays.asList("FSBBLOGGVUXNA", "MAGMAKOLUMNER", "INFORMATIONSTIDNINGAR", "LAGTEXTER", "MYNDIGHET", "PROPOSITIONER", "BARNLITTERATUR", "FSBESSAISTIK", "FSBSAKPROSA", "FSBSKONLIT1960-1999", "FSBSKONLIT2000TAL", "UNGDOMSLITTERATUR", "FNB1999", "FNB2000", "HBL1991", "HBL1998", "HBL1999", "HBL20122013", "HBL2014", "JAKOBSTADSTIDNING1999", "JAKOBSTADSTIDNING2000", "PARGASKUNGORELSER2011", "PARGASKUNGORELSER2012", "SYDOSTERBOTTEN2010", "SYDOSTERBOTTEN2011", "SYDOSTERBOTTEN2012", "SYDOSTERBOTTEN2013", "SYDOSTERBOTTEN2014", "VASABLADET1991", "VASABLADET2012", "VASABLADET2013", "VASABLADET2014", "ABOUNDERRATTELSER2012", "ABOUNDERRATTELSER2013", "OSTERBOTTENSTIDNING2011", "OSTERBOTTENSTIDNING2012", "OSTERBOTTENSTIDNING2013", "OSTERBOTTENSTIDNING2014", "BORGABLADET", "VASTRANYLAND", "AT2012", "OSTRANYLAND", "ASTRA1960-1979", "ASTRANOVA", "BULLEN", "FANBARAREN", "FINSKTIDSKRIFT", "FORUMFEOT", "HANKEITEN", "HANKEN", "JFT", "KALLAN", "MEDDELANDEN", "NYAARGUS", "STUDENTBLADET", "SVENSKBYGDEN", "ROMI", "ROMII", "ROM99", "STORSUC", "BLOGGMIX1998", "BLOGGMIX1999", "BLOGGMIX2000", "BLOGGMIX2001", "BLOGGMIX2002", "BLOGGMIX2003", "BLOGGMIX2004", "BLOGGMIX2005", "BLOGGMIX2006", "BLOGGMIX2007", "BLOGGMIX2008", "BLOGGMIX2009", "BLOGGMIX2010", "BLOGGMIX2011", "BLOGGMIX2012", "BLOGGMIX2013", "BLOGGMIX2014", "BLOGGMIX2015", "BLOGGMIXODAT", "TWITTER", "GP1994", "GP2001", "GP2002", "GP2003", "GP2004", "GP2005", "GP2006", "GP2007", "GP2008", "GP2009", "GP2010", "GP2011", "GP2012", "GP2013", "GP2D", "PRESS65", "PRESS76", "PRESS95", "PRESS96", "PRESS97", "PRESS98", "WEBBNYHETER2001", "WEBBNYHETER2002", "WEBBNYHETER2003", "WEBBNYHETER2004", "WEBBNYHETER2005", "WEBBNYHETER2006", "WEBBNYHETER2007", "WEBBNYHETER2008", "WEBBNYHETER2009", "WEBBNYHETER2010", "WEBBNYHETER2011", "WEBBNYHETER2012", "WEBBNYHETER2013", "ATTASIDOR", "DN1987", "ORDAT", "FOF", "SFS", "SNP7879", "SUC3", "WIKIPEDIA-SV", "TALBANKEN"));
     private static List<String> ILC4CLARIN_CORPORA = new ArrayList<String>();
     //Collections.unmodifiableList(Arrays.asList("PAROLE", "RICCARDO", "TESTCORPUS", "ABB"));
+    
+    private static final Logger LOG
+            = LoggerFactory.getLogger(ServiceInfo.class);
 
     /**
      *
@@ -130,8 +134,8 @@ public class ServiceInfo {
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);
     }
-    
-     /**
+
+    /**
      * @return the ILC4CLARIN_CORPORA
      */
     public static List<String> getILC4CLARIN_CORPORA() {
@@ -187,6 +191,8 @@ public class ServiceInfo {
 
     }
 
+    
+
     /**
      *
      * @param prop
@@ -194,36 +200,18 @@ public class ServiceInfo {
      */
     public static List<String> getIlc4ClarinOpenCorpora(Properties prop) {
         ObjectMapper mapper = new ObjectMapper();
-        String korpUrl = "";
-        String korpPort = "";
-        Boolean useKorpPort = true;
-        String transport;
-        // create the korp url
-        korpUrl = prop.getProperty("korpUrl");
-        korpPort = prop.getProperty("korpPort");
-        transport=prop.getProperty("transport");
-
-        if ("True".equalsIgnoreCase(prop.getProperty("useKorpPort"))) {
-            useKorpPort = true;
-        } else {
-            useKorpPort = false;
-        }
-
-        if (useKorpPort) {
-            korpUrl = transport+"://"+korpUrl + ":" + korpPort + "/";
-        } else {
-            korpUrl = transport+"://"+korpUrl + "/";
-        }
-
-        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.ServiceInfo.getIlc4ClarinOpenCorpora() " + korpUrl);
-        ServiceInfo si = null;
-        final String wsString = korpUrl;
+        
+        final String wsString = ManageProperties.createKorpUrl(prop);
         final String queryString = "info";
-        System.out.println("STICA " + wsString + queryString);
+
+        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.ServiceInfo.getIlc4ClarinOpenCorpora() " + wsString+ queryString);
+        ServiceInfo si = null;
+        
+        
         try {
             URL korp = new URL(wsString + queryString);
             si = mapper.readerFor(ServiceInfo.class).readValue(korp.openStream());
-            
+
         } catch (JsonParseException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -251,7 +239,7 @@ public class ServiceInfo {
             }
             isPC = false;
         }
-        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.ServiceInfo.getIlc4ClarinOpenCorpora() " + openCorpora);
+        LOG.debug("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.ServiceInfo.getIlc4ClarinOpenCorpora() " + openCorpora);
         return openCorpora;
 
     }
@@ -279,15 +267,17 @@ public class ServiceInfo {
         List<String> filteredCorpora = new ArrayList<String>();
         List<String> openCorpora = ServiceInfo.getIlc4ClarinOpenCorpora(prop);
         String ilc4ClarinCorpora = prop.getProperty("ILC4CLARIN_CORPORA");
-        List<String> corporaFromFile=Collections.unmodifiableList(Arrays.asList(ilc4ClarinCorpora.split(",")));
+        List<String> corporaFromFile = Collections.unmodifiableList(Arrays.asList(ilc4ClarinCorpora.split(",")));
+
+        // sets available corpora. This filters out potential test corpora in the korp backend
         setILC4CLARIN_CORPORA(corporaFromFile);
-        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.ServiceInfo.getIlc4ClarinCorpora() " + ilc4ClarinCorpora);
+        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.ServiceInfo.getIlc4ClarinCorpora() " + ilc4ClarinCorpora);
         for (String corpus : openCorpora) {
             if (getILC4CLARIN_CORPORA().contains(corpus)) {
                 filteredCorpora.add(corpus);
             }
         }
-        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.ServiceInfo.getIlc4ClarinCorpora() " + filteredCorpora);
+        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.ServiceInfo.getIlc4ClarinCorpora() " + filteredCorpora);
         return filteredCorpora;
     }
 
