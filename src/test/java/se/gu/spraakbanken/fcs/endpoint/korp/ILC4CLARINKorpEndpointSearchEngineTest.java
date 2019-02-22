@@ -210,10 +210,10 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         List<ResourceInfo> riList = sed.getResourceList("hdl:20.500.11752/corpora");
         if (riList == null) {
             
-            System.out.println("\t\t\tAAAA NULL ");
+            System.out.println("ResourceInfo list is null ");
         } else {
-            System.out.println("\t\t\tAAAA NOT NULL " + riList.get(0).getTitle());
-            System.out.println("\t\t\tAAAA NOT NULL " + riList.toString());
+            System.out.println("ResourceInfo list is not null and " + riList.get(0).getTitle());
+            System.out.println("ResourceInfo list is not null and " + riList.toString());
         }
         assertEquals("hits", riList.get(0).getAvailableDataViews().get(0).getIdentifier());
         assertEquals("SEND_BY_DEFAULT", riList.get(0).getAvailableDataViews().get(0).getDeliveryPolicy().toString());
