@@ -1,0 +1,11 @@
+--2019-02-22 15:19:53--  http://pcdelgratta.ilc.cnr.it:8080/ilc4clarin-fcs-korp-test/sru?operation=searchRetrieve
+Resolving pcdelgratta.ilc.cnr.it (pcdelgratta.ilc.cnr.it)... 127.0.1.1
+Connecting to pcdelgratta.ilc.cnr.it (pcdelgratta.ilc.cnr.it)|127.0.1.1|:8080... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: unspecified [application/xml]
+Saving to: ‘sru?operation=searchRetrieve’
+
+sru?operation=searchRetrieve                           [<=>                                                                                                              ]       0  --.-KB/s               sru?operation=searchRetrieve                           [ <=>                                                                                                             ]   2.23K  --.-KB/s    in 0s      
+
+2019-02-22 15:19:53 (4.65 MB/s) - ‘sru?operation=searchRetrieve’ saved [2288]
+

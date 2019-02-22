@@ -198,6 +198,7 @@ public class CorporaInfo {
         final String wsString = ManageProperties.createKorpUrl(prop);
         final String queryString = "info?&corpus=";
         LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getIlc4ClarinCorporaInfo() " + wsString);
+        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getIlc4ClarinCorporaInfo() "+wsString);
         CorporaInfo ci = null;
 //	final String wsString ="https://spraakbanken.gu.se/ws/korp/v6/?";
 //	final String queryString = "command=info&corpus=";
