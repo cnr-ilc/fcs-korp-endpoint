@@ -57,6 +57,7 @@ public class FCSToCQPConverter {
     public static String makeCQPFromCQL(final SRUQuery<CQLNode> query)
 	throws SRUException {
         final CQLNode node = query.getParsedQuery();
+        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.cqp.FCSToCQPConverter.makeCQPFromCQL() "+query.getRawQuery());
         /*
          * Translate the CQL query to a Lucene query. If a CQL feature was used,
          * that is not supported by us, throw a SRU error (with a detailed error
