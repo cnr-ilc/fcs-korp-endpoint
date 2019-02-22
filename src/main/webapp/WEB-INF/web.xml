@@ -4,10 +4,10 @@
 	 xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	 id="SB_KORP_SRU_SERVER" version="2.5">
-  <display-name>Språkbankens Korp-SRU/CQL-tjänst</display-name>
+  <display-name>ILC4CLARIN Korp-SRU/CQL-EndPoint</display-name>
 
   <servlet>
-    <display-name>Språkbanken's SRU/CQL Service (HTTP Interface)</display-name>
+    <display-name>ILC4CLARIN's SRU/CQL Service (HTTP Interface)</display-name>
     <servlet-name>SBKorpSRUServlet</servlet-name>
     <servlet-class>eu.clarin.sru.server.utils.SRUServerServlet</servlet-class>
     <init-param>

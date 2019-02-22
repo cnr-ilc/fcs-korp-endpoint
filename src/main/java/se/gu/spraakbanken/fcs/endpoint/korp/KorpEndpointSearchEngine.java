@@ -430,18 +430,20 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
             if ("x-fcs-context".equals(erd)) {
                 hasFcsContextCorpus = true;
                 fcsContextCorpus = request.getExtraRequestData("x-fcs-context");
+                System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() with context "+fcsContextCorpus);
                 break;
             }
         }
         if (hasFcsContextCorpus && !"".equals(fcsContextCorpus)) {
-            if (!"hdl%3A10794%2Fsbmoderna".equals(fcsContextCorpus)) {
+            if (!"hdl%3A20%2E500%2E11752%2Fcorpora".equals(fcsContextCorpus)) {
                 LOG.info("Loading specific corpus data: '{}'", fcsContextCorpus);
                 //getCorporaInfo();
             }
             // hdl%3A10794%2Fsbmoderna is the default
         }
 
-        Query queryRes = makeQuery(query, openCorporaInfo, request.getStartRecord(), request.getMaximumRecords());
+        //Query queryRes = makeQuery(query, openCorporaInfo, request.getStartRecord(), request.getMaximumRecords());
+        Query queryRes = makeIlc4ClarinQuery(getKeseProp(),query, openCorporaInfo, request.getStartRecord(), request.getMaximumRecords());
         if (queryRes == null) {
             throw new SRUException(
                     SRUConstants.SRU_CANNOT_PROCESS_QUERY_REASON_UNKNOWN,

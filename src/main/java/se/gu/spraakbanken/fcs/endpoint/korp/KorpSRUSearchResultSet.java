@@ -267,12 +267,19 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
      */
     @Override
     public void writeRecord(XMLStreamWriter writer)
+           
             throws XMLStreamException {
+        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() ");
         AdvancedDataViewWriter helper =
                 new AdvancedDataViewWriter(AdvancedDataViewWriter.Unit.ITEM);
-        URI wordLayerId = URI.create("http://spraakbanken.gu.se/ns/fcs/layer/word");
-        URI lemmaLayerId = URI.create("http://spraakbanken.gu.se/ns/fcs/layer/lemma");
-        URI posLayerId = URI.create("http://spraakbanken.gu.se/ns/fcs/layer/pos");
+//        URI wordLayerId = URI.create("http://spraakbanken.gu.se/ns/fcs/layer/word");
+//        URI lemmaLayerId = URI.create("http://spraakbanken.gu.se/ns/fcs/layer/lemma");
+//        URI posLayerId = URI.create("http://spraakbanken.gu.se/ns/fcs/layer/pos");
+        
+        URI wordLayerId = URI.create("http://ilc4clarin.ilc.cnr.it/services/fcs/layer/word");
+        URI lemmaLayerId = URI.create("http://ilc4clarin.ilc.cnr.it/services/fcs/layer/lemma");
+        URI posLayerId = URI.create("http://ilc4clarin.ilc.cnr.it/services/fcs/layer/pos");
+        
 
 	Kwic kwic = resultSet.getKwic().get(currentRecordCursor - startRecord);
 	List<Token> tokens = kwic.getTokens();
@@ -288,6 +295,7 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
 		long end = start + tokens.get(i).getWord().length();
                 helper.addSpan(wordLayerId, start, end, tokens.get(i).getWord());
 		try {
+                    System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() "+SUCTranslator.fromSUC(tokens.get(i).getMsd()).get(0));
 		    helper.addSpan(posLayerId, start, end, SUCTranslator.fromSUC(tokens.get(i).getMsd()).get(0));
 		} catch (SRUException se) {}
 		helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma());
