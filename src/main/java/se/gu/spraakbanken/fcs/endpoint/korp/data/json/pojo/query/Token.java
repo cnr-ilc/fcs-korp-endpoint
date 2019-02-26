@@ -13,9 +13,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-	"lemma",
-	"msd",
-	"word"
+    "lemma",
+    "msd",
+    "word"
 })
 
 public class Token {
@@ -26,76 +26,88 @@ public class Token {
     private String msd;
     @JsonProperty("word")
     private String word;
+    @JsonProperty("pos")
+    private String pos;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
      *
-     * @return
-     * The lemma
+     * @return The lemma
      */
     @JsonProperty("lemma")
     public String getLemma() {
-	return lemma;
+        return lemma;
     }
 
     /**
      *
-     * @param lemma
-     * The lemma
+     * @param lemma The lemma
      */
     @JsonProperty("lemma")
     public void setLemma(String lemma) {
-	this.lemma = lemma;
+        this.lemma = lemma;
     }
 
     /**
      *
-     * @return
-     * The msd
+     * @return The msd
      */
     @JsonProperty("msd")
     public String getMsd() {
-	return msd;
+        return msd;
     }
 
     /**
      *
-     * @param msd
-     * The msd
+     * @param msd The msd
      */
     @JsonProperty("msd")
     public void setMsd(String msd) {
-	this.msd = msd;
+        this.msd = msd;
     }
 
     /**
      *
-     * @return
-     * The word
+     * @return The word
      */
     @JsonProperty("word")
     public String getWord() {
-	return word;
+        return word;
     }
 
     /**
      *
-     * @param word
-     * The word
+     * @param word The word
      */
     @JsonProperty("word")
     public void setWord(String word) {
-	this.word = word;
+        this.word = word;
+    }
+
+    /**
+     * @return the pos
+     */
+    @JsonProperty("pos")
+    public String getPos() {
+        return pos;
+    }
+
+    /**
+     * @param pos the pos to set
+     */
+    @JsonProperty("pos")
+    public void setPos(String pos) {
+        this.pos = pos;
     }
 
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
-	return this.additionalProperties;
+        return this.additionalProperties;
     }
 
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
-	this.additionalProperties.put(name, value);
+        this.additionalProperties.put(name, value);
     }
 }
