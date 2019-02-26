@@ -378,6 +378,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         //Query queryRes = kese.makeQuery(cqpQuery, openCorporaInfo, 0, 25);
         Query queryRes = kese.makeIlc4ClarinQuery(prop, cqpQuery, openCorporaInfo, 1, 250);
         KorpSRUSearchResultSet kssrs = new KorpSRUSearchResultSet(config, diagnostics, queryRes, query, openCorporaInfo);
+        kssrs.setKssrsProp(prop);
         StringWriter sw = new StringWriter();
         XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newFactory();
         XMLStreamWriter xmlStreamWriter = xmlOutputFactory.createXMLStreamWriter(sw);
@@ -403,6 +404,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
     
     @Test
     public void selectedCorporaInfo() throws SRUException, SRUConfigException, XMLStreamException {
+       
         SRUDiagnosticList diagnostics = new Diagnostic();
         kese.doInit(config, new SRUQueryParserRegistry.Builder().register(new FCSQueryParser()), params);
         //SRURequest request = new SRURequestImpl(config, queryParsers, new HttpServletRequestWrapper());
@@ -412,12 +414,13 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.selectedCorporaInfo() "+ci.getCorpora());
         
         
-        final String query = "[word = 'sono'][pos = 'VERB']";
+        final String query = "[word = 'dispersa'][pos = 'VERB']";
         final String cqpQuery = "[word = \"dispersa\"]"; //[pos = 'VERB']";
         //params
         //Query queryRes = kese.makeQuery(cqpQuery, openCorporaInfo, 0, 25);
         Query queryRes = kese.makeIlc4ClarinQuery(prop, cqpQuery, ci, 1, 250);
         KorpSRUSearchResultSet kssrs = new KorpSRUSearchResultSet(config, diagnostics, queryRes, query, ci);
+         kssrs.setKssrsProp(prop);
         StringWriter sw = new StringWriter();
         XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newFactory();
         XMLStreamWriter xmlStreamWriter = xmlOutputFactory.createXMLStreamWriter(sw);

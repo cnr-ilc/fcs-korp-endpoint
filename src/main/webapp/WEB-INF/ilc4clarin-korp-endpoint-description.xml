@@ -68,8 +68,10 @@
                     <Languages>
                         <Language>ita</Language>
                     </Languages>
-                    <AvailableDataViews ref="hits adv"/>
-                    <AvailableLayers ref="word lemma pos"/>
+<!--                    <AvailableDataViews ref="hits adv"/>
+                    <AvailableLayers ref="word lemma pos"/>-->
+                    <AvailableDataViews ref="hits"/>
+                    <AvailableLayers ref="word pos"/>
 <!--                    <Resources>
                         <Resource pid="hdl:10794/suc">
                             <Title xml:lang="sv">SUC-korpusen</Title>
