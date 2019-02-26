@@ -46,6 +46,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.clarin.sru.server.SRUServer;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Properties;
 
 import se.gu.spraakbanken.fcs.endpoint.korp.cqp.FCSToCQPConverter;
@@ -88,9 +90,8 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
     public static final String RESOURCE_INVENTORY_URL
             = "se.gu.spraakbanken.fcs.korp.sru.resourceInventoryURL";
 
-    
-    private Properties keseProp=new Properties();
-    
+    private Properties keseProp = new Properties();
+
     protected EndpointDescription createEndpointDescription(
             ServletContext context, SRUServerConfig config,
             Map<String, String> params) throws SRUConfigException {
@@ -110,7 +111,6 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
             throw new SRUConfigException("Malformed URL for initializing resource info inventory", mue);
         }
     }
-    
 
     /**
      * Initialize the search engine. This initialization should be tailored
@@ -145,7 +145,7 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
     protected void doInit(SRUServerConfig config,
             SRUQueryParserRegistry.Builder queryParserBuilder,
             Map<String, String> params) throws SRUConfigException {
-        Properties prop=new Properties();
+        Properties prop = new Properties();
         LOG.info("KorpEndpointSearchEngine::doInit {}", config.getPort());
         LOG.debug("Config Parameters" + " " + params);
         ReadExternalPropFiles read = new ReadExternalPropFiles();
@@ -159,7 +159,7 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
         }
         setKeseProp(prop);
         List<String> openCorpora = ServiceInfo.getIlc4ClarinCorpora(prop);
-        openCorporaInfo = CorporaInfo.getIlc4ClarinCorporaInfo(prop,openCorpora);
+        openCorporaInfo = CorporaInfo.getIlc4ClarinCorporaInfo(prop, openCorpora);
     }
 
     /**
@@ -395,7 +395,7 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
     public SRUSearchResultSet search(SRUServerConfig config,
             SRURequest request, SRUDiagnosticList diagnostics)
             throws SRUException {
-        
+        CorporaInfo contextedCorpora = new CorporaInfo();
         String query;
         if (request.isQueryType(Constants.FCS_QUERY_TYPE_CQL)) {
             /*
@@ -430,20 +430,37 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
             if ("x-fcs-context".equals(erd)) {
                 hasFcsContextCorpus = true;
                 fcsContextCorpus = request.getExtraRequestData("x-fcs-context");
-                System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() with context "+fcsContextCorpus);
+                System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() with context " + fcsContextCorpus);
                 break;
             }
         }
+
         if (hasFcsContextCorpus && !"".equals(fcsContextCorpus)) {
-            if (!"hdl%3A20%2E500%2E11752%2Fcorpora".equals(fcsContextCorpus)) {
+
+            //  if (!"hdl%3A20%2E500%2E11752%2Fcorpora".equals(fcsContextCorpus)) {
+            if (!getKeseProp().getProperty("DEFCONTEXT").equals(fcsContextCorpus)) {
                 LOG.info("Loading specific corpus data: '{}'", fcsContextCorpus);
+                
+                contextedCorpora=CorporaInfo.selectedCorporaInfo(keseProp, fcsContextCorpus);
+                
+
                 //getCorporaInfo();
+                System.out.println("STICA NOT DEFAULT se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() with corpora " + contextedCorpora.getCorpora()+ " - "+fcsContextCorpus);
+            } else {
+                contextedCorpora = openCorporaInfo;
+                System.out.println("STICA DEFAULT se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() with corpora " + ServiceInfo.getIlc4ClarinCorpora(keseProp));
             }
             // hdl%3A10794%2Fsbmoderna is the default
+        } else {
+            System.out.println("STICA DUNNO se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search()");
+            contextedCorpora = openCorporaInfo;
         }
 
+        System.err.println("STICA Loading specific corpus data: " + fcsContextCorpus);
+
         //Query queryRes = makeQuery(query, openCorporaInfo, request.getStartRecord(), request.getMaximumRecords());
-        Query queryRes = makeIlc4ClarinQuery(getKeseProp(),query, openCorporaInfo, request.getStartRecord(), request.getMaximumRecords());
+        //Query queryRes = makeIlc4ClarinQuery(getKeseProp(), query, openCorporaInfo, request.getStartRecord(), request.getMaximumRecords());
+        Query queryRes = makeIlc4ClarinQuery(getKeseProp(), query, contextedCorpora, request.getStartRecord(), request.getMaximumRecords());
         if (queryRes == null) {
             throw new SRUException(
                     SRUConstants.SRU_CANNOT_PROCESS_QUERY_REASON_UNKNOWN,
@@ -483,11 +500,11 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
         }
         return null;
     }
-    
+
     protected Query makeIlc4ClarinQuery(Properties prop, final String cqpQuery, CorporaInfo openCorporaInfo, final int startRecord, final int maximumRecords) {
         ObjectMapper mapper = new ObjectMapper();
         String wsString = ManageProperties.createKorpUrl(prop);//"https://spraakbanken.gu.se/ws/korp/v6/?";
-        String queryString = "query?defaultcontext=1+sentence&show=msd,lemma&cqp=";
+        String queryString = "query?defaultcontext=1+sentence&show=msd,lemma,pos&cqp=";
         String startParam = "&start=" + (startRecord == 1 ? 0 : startRecord - 1);
         String endParam = "&end=" + (maximumRecords == 0 ? 250 : startRecord - 1 + maximumRecords - 1);
         String corpusParam = "&corpus=";
@@ -499,8 +516,9 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
             // truncates the query string 
             // using URLConnection.getInputStream() instead. /ljo
             URLConnection connection = korp.openConnection();
-            
-           LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() "+korp.toString());
+
+            System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() " + korp.toString());
+
             return mapper.readerFor(Query.class).readValue(connection.getInputStream());
         } catch (JsonParseException e) {
             // TODO Auto-generated catch block

@@ -105,7 +105,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         params.put(SRUServerConfig.SRU_PORT, "8082");
         params.put(SRUServerConfig.SRU_DATABASE, "sru-server");
         params.put(SRUServerServlet.SRU_SERVER_CONFIG_LOCATION_PARAM, "src/main/webapp/WEB-INF/sru-server-config.xml");
-        params.put("eu.clarin.sru.server.propertyFile", "/tmp/config-test.properties");
+        params.put("eu.clarin.sru.server.propertyFile", "/opt/java/app/ilc4clarin-fcs-korp-endpoint/config-endpoint.properties");
 
         // try {
         //     String baseUrl = tester.createSocketConnector(true);
@@ -159,6 +159,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         for (String key : kese.getCorporaInfo().getCorpora().keySet()) {
              
              Corpus c = kese.getCorporaInfo().getCorpora().get(key);
+            
              System.out.println("Corpus with key " + key +" has " +c.getAttrs().getP().toString());
         }
 
@@ -193,6 +194,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         String pid = "hdl:20.500.11752/corpora";//hdl:20.500.11752/corpora";
         List<ResourceInfo> riList = sed.getResourceList(pid);
         for (ResourceInfo ri : riList) {
+            System.out.println("ResourceInfo with PID " + ri.getPid() + " has title " + ri.getTitle());
             if (ri.hasSubResources()) {
                 List<ResourceInfo> risList = ri.getSubResources();
                 for (ResourceInfo sri : risList) {
@@ -398,6 +400,54 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         assertNotNull(sw.toString());
         //assertEquals(res, resActual);
     }
+    
+    @Test
+    public void selectedCorporaInfo() throws SRUException, SRUConfigException, XMLStreamException {
+        SRUDiagnosticList diagnostics = new Diagnostic();
+        kese.doInit(config, new SRUQueryParserRegistry.Builder().register(new FCSQueryParser()), params);
+        //SRURequest request = new SRURequestImpl(config, queryParsers, new HttpServletRequestWrapper());
+        //SRUSearchResultSet ssrs = kese.search(config, request, diagnostics);
+        Properties prop = kese.getKeseProp();
+        CorporaInfo ci =CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/riccardo");
+        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.selectedCorporaInfo() "+ci.getCorpora());
+        
+        
+        final String query = "[word = 'sono'][pos = 'VERB']";
+        final String cqpQuery = "[word = \"dispersa\"]"; //[pos = 'VERB']";
+        //params
+        //Query queryRes = kese.makeQuery(cqpQuery, openCorporaInfo, 0, 25);
+        Query queryRes = kese.makeIlc4ClarinQuery(prop, cqpQuery, ci, 1, 250);
+        KorpSRUSearchResultSet kssrs = new KorpSRUSearchResultSet(config, diagnostics, queryRes, query, ci);
+        StringWriter sw = new StringWriter();
+        XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newFactory();
+        XMLStreamWriter xmlStreamWriter = xmlOutputFactory.createXMLStreamWriter(sw);
+        try {
+            System.out.println("getCurrentRecordCursor 0: " + kssrs.getCurrentRecordCursor());
+            if (kssrs.nextRecord()) {
+                System.out.println("search1-selectedCorporaInfo b4: " + sw.toString());
+                kssrs.writeRecord(xmlStreamWriter);
+                System.out.println("search1-selectedCorporaInfo after: " + sw.toString());
+                
+            } else {
+            System.out.println("getRecordCount: " + kssrs.getRecordCount());
+            }
+            xmlStreamWriter.flush();
+            xmlStreamWriter.close();
+        } catch (Exception ex) {
+            xmlStreamWriter.close();
+        }
+
+        System.out.println("getHits: " + queryRes.getHits());
+        System.out.println("getTotalRecordCount: " + kssrs.getTotalRecordCount());
+        System.out.println("getRecordCount: " + kssrs.getRecordCount());
+        System.out.println("getCurrentRecordCursor 1: " + kssrs.getCurrentRecordCursor());
+        assertNotNull(sw.toString());
+        
+
+       
+        //assertEquals(res, resActual);
+    }
+    
 
     @AfterClass
     public static void cleanupServletContainer() throws Exception {
