@@ -430,7 +430,7 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
             if ("x-fcs-context".equals(erd)) {
                 hasFcsContextCorpus = true;
                 fcsContextCorpus = request.getExtraRequestData("x-fcs-context");
-                System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() with context " + fcsContextCorpus);
+                LOG.debug("se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() with context '{}'",fcsContextCorpus);
                 break;
             }
         }
@@ -444,19 +444,20 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
                 contextedCorpora=CorporaInfo.selectedCorporaInfo(keseProp, fcsContextCorpus);
                 
 
-                //getCorporaInfo();
-                System.out.println("STICA NOT DEFAULT se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() with corpora " + contextedCorpora.getCorpora()+ " - "+fcsContextCorpus);
+               
             } else {
                 contextedCorpora = openCorporaInfo;
-                System.out.println("STICA DEFAULT se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() with corpora " + ServiceInfo.getIlc4ClarinCorpora(keseProp));
+                LOG.info("No context specified: '{}'", fcsContextCorpus);
+               
             }
             // hdl%3A10794%2Fsbmoderna is the default
         } else {
-            System.out.println("STICA DUNNO se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search()");
+            LOG.info("No context specified: '{}'", fcsContextCorpus);
+            
             contextedCorpora = openCorporaInfo;
         }
 
-        System.err.println("STICA Loading specific corpus data: " + fcsContextCorpus);
+       
 
         //Query queryRes = makeQuery(query, openCorporaInfo, request.getStartRecord(), request.getMaximumRecords());
         //Query queryRes = makeIlc4ClarinQuery(getKeseProp(), query, openCorporaInfo, request.getStartRecord(), request.getMaximumRecords());
@@ -466,7 +467,10 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
                     SRUConstants.SRU_CANNOT_PROCESS_QUERY_REASON_UNKNOWN,
                     "The query execution failed by this CLARIN-FCS Endpoint.");
         }
-        return new KorpSRUSearchResultSet(config, request, diagnostics, queryRes, query, openCorporaInfo);
+        KorpSRUSearchResultSet kssrs = new KorpSRUSearchResultSet(config, request, diagnostics, queryRes, query, openCorporaInfo);
+        kssrs.setKssrsProp(keseProp);
+        //return new KorpSRUSearchResultSet(config, request, diagnostics, queryRes, query, openCorporaInfo);
+        return kssrs; //new KorpSRUSearchResultSet(config, request, diagnostics, queryRes, query, openCorporaInfo);
     }
 
     protected Query makeQuery(final String cqpQuery, CorporaInfo openCorporaInfo, final int startRecord, final int maximumRecords) {
@@ -517,8 +521,7 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
             // using URLConnection.getInputStream() instead. /ljo
             URLConnection connection = korp.openConnection();
 
-            System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() " + korp.toString());
-
+           
             return mapper.readerFor(Query.class).readValue(connection.getInputStream());
         } catch (JsonParseException e) {
             // TODO Auto-generated catch block

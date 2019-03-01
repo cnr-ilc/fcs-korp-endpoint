@@ -200,7 +200,7 @@ public class CorporaInfo {
         final String wsString = ManageProperties.createKorpUrl(prop);
         final String queryString = "info?&corpus=";
         LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getIlc4ClarinCorporaInfo() " + wsString);
-        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getIlc4ClarinCorporaInfo() " + wsString);
+        
         CorporaInfo ci = null;
 //	final String wsString ="https://spraakbanken.gu.se/ws/korp/v6/?";
 //	final String queryString = "command=info&corpus=";
@@ -209,7 +209,7 @@ public class CorporaInfo {
         LOG.info("URL '{}'", wsString + queryString);
         final String corporaValues = getCorpusParameterValues(corpora);
         LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getIlc4ClarinCorporaInfo() " + corporaValues);
-        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getIlc4ClarinCorporaInfo() " + corporaValues);
+        
         try {
             URL korp = new URL(wsString + queryString + corporaValues);
 
@@ -263,14 +263,14 @@ public class CorporaInfo {
         for (String mapped : mappedList) {
             ctx = mapped.split("=")[0];
             corpus = mapped.split("=")[1];
-            System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.selectedCorporaInfo() Inserting key "+ctx+ " with value "+corpus);
+            //System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.selectedCorporaInfo() Inserting key "+ctx+ " with value "+corpus);
             map.put(ctx, corpus);
      
         }
         
         for (String source : sourceList) {
             String sc=map.get(source);
-            System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.selectedCorporaInfo() " + source);
+            
             ret.add(sc);
         }
 

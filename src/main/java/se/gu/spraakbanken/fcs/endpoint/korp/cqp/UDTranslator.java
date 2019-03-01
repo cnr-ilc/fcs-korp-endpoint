@@ -69,7 +69,7 @@ public class UDTranslator extends POSTranslator {
     @Override
     public List<String> fromPos(String pos)throws SRUException {
         
-        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.cqp.UDTranslator.fromPos() "+pos);
+       
         List<String> res = null;
 	
 	res = TO_UD.get(pos.toUpperCase());
