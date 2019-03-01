@@ -123,7 +123,7 @@ public class FCSToCQPConverter {
 	throws SRUException {
         QueryNode tree = query.getParsedQuery();
         LOG.debug("FCS-Query: {}", tree.toString());
-	System.out.println("STICA tree=" + tree.toString());	
+	
         // A somewhat crude query translator
         if (tree instanceof QuerySequence) {
 	    return getQuerySequence(tree);

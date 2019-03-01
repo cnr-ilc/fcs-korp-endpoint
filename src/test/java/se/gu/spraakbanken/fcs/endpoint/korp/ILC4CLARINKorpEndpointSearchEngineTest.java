@@ -154,16 +154,14 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         System.out.println("****kese.getCorporaInfo()****" + kese.getCorporaInfo());
         assertNotNull(kese.getCorporaInfo());
         assertNotNull(kese.getCorporaInfo().getTime());
-        
 
         for (String key : kese.getCorporaInfo().getCorpora().keySet()) {
-             
-             Corpus c = kese.getCorporaInfo().getCorpora().get(key);
-            
-             System.out.println("Corpus with key " + key +" has " +c.getAttrs().getP().toString());
+
+            Corpus c = kese.getCorporaInfo().getCorpora().get(key);
+
+            System.out.println("Corpus with key " + key + " has " + c.getAttrs().getP().toString());
         }
 
-      
     }
 
     @Test
@@ -206,12 +204,13 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
 
         }
     }
+
     @Test
     public void getResourcesFromDescription() throws SRUException {
         //List<ResourceInfo> riList = sed.getResourceList("hdl:20.500.11752/parole"); //hdl:10794/sbmoderna
         List<ResourceInfo> riList = sed.getResourceList("hdl:20.500.11752/corpora");
         if (riList == null) {
-            
+
             System.out.println("ResourceInfo list is null ");
         } else {
             System.out.println("ResourceInfo list is not null and " + riList.get(0).getTitle());
@@ -401,26 +400,25 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         assertNotNull(sw.toString());
         //assertEquals(res, resActual);
     }
-    
+
     @Test
     public void selectedCorporaInfo() throws SRUException, SRUConfigException, XMLStreamException {
-       
+
         SRUDiagnosticList diagnostics = new Diagnostic();
         kese.doInit(config, new SRUQueryParserRegistry.Builder().register(new FCSQueryParser()), params);
         //SRURequest request = new SRURequestImpl(config, queryParsers, new HttpServletRequestWrapper());
         //SRUSearchResultSet ssrs = kese.search(config, request, diagnostics);
         Properties prop = kese.getKeseProp();
-        CorporaInfo ci =CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/riccardo");
-        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.selectedCorporaInfo() "+ci.getCorpora());
-        
-        
+        CorporaInfo ci = CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/riccardo");
+        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.selectedCorporaInfo() " + ci.getCorpora());
+
         final String query = "[word = 'dispersa'][pos = 'VERB']";
-        final String cqpQuery = "[word = \"dispersa\"]"; //[pos = 'VERB']";
+        final String cqpQuery = "[word = \"I\"]"; //[pos = 'VERB']";
         //params
         //Query queryRes = kese.makeQuery(cqpQuery, openCorporaInfo, 0, 25);
         Query queryRes = kese.makeIlc4ClarinQuery(prop, cqpQuery, ci, 1, 250);
         KorpSRUSearchResultSet kssrs = new KorpSRUSearchResultSet(config, diagnostics, queryRes, query, ci);
-         kssrs.setKssrsProp(prop);
+        kssrs.setKssrsProp(prop);
         StringWriter sw = new StringWriter();
         XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newFactory();
         XMLStreamWriter xmlStreamWriter = xmlOutputFactory.createXMLStreamWriter(sw);
@@ -430,9 +428,9 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
                 System.out.println("search1-selectedCorporaInfo b4: " + sw.toString());
                 kssrs.writeRecord(xmlStreamWriter);
                 System.out.println("search1-selectedCorporaInfo after: " + sw.toString());
-                
+
             } else {
-            System.out.println("getRecordCount: " + kssrs.getRecordCount());
+                System.out.println("getRecordCount: " + kssrs.getRecordCount());
             }
             xmlStreamWriter.flush();
             xmlStreamWriter.close();
@@ -445,12 +443,9 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         System.out.println("getRecordCount: " + kssrs.getRecordCount());
         System.out.println("getCurrentRecordCursor 1: " + kssrs.getCurrentRecordCursor());
         assertNotNull(sw.toString());
-        
 
-       
         //assertEquals(res, resActual);
     }
-    
 
     @AfterClass
     public static void cleanupServletContainer() throws Exception {

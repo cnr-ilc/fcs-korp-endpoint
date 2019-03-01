@@ -95,7 +95,7 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
     private int maximumRecords = 1000;
     private int recordCount; //startRecord + currentPageMaxRecords
     // XMLStreamWriterHelper.FCS_NS private!
-    
+
     private Properties kssrsProp = new Properties();
     public static final String CLARIN_FCS_RECORD_SCHEMA = "http://clarin.eu/fcs/resource";
     private static Logger LOG = LoggerFactory.getLogger(KorpSRUSearchResultSet.class);
@@ -126,12 +126,7 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
         currentRecordCursor = startRecord - 1;
         maximumRecords = startRecord - 1 + request.getMaximumRecords();
         recordCount = request.getMaximumRecords();
-        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.<init>() " + corporaInfo.getCorpora());
-        for (String key : corporaInfo.getCorpora().keySet()) {
-
-            Corpus c = corporaInfo.getCorpora().get(key);
-            System.out.println("STICA Corpus with key " + key + " has " + c.getAttrs().getP().toString());
-        }
+        
     }
 
     protected KorpSRUSearchResultSet(SRUServerConfig serverConfig, SRUDiagnosticList diagnostics, final Query resultSet, final String query, final CorporaInfo corporaInfo) {
@@ -143,12 +138,8 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
         this.maximumRecords = 250;
         this.currentRecordCursor = startRecord - 1;
         this.recordCount = 250;
-        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet " + corporaInfo.getCorpora());
-        for (String key : corporaInfo.getCorpora().keySet()) {
-
-            Corpus c = corporaInfo.getCorpora().get(key);
-            System.out.println("STICA Corpus with key " + key + " has " + c.getAttrs().getP().toString());
-        }
+        
+        
     }
 
     /**
@@ -314,26 +305,24 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
 //        Match match = kwic.getMatch();
 //        String corpus = kwic.getCorpus();
 //
-//        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() " + corpus);
+
 //
 //        XMLStreamWriterHelper.writeStartResource(writer, corpus + "-" + match.getPosition(), null);
 //        XMLStreamWriterHelper.writeStartResourceFragment(writer, null, null);
-//        System.err.println("STICA QUI 1 "+corpus);
+
 //        long start = 1;
 //        if (match.getStart() != 1) {
-//            System.err.println("STICA QUI 2 "+corpus);
+
 //            for (int i = 0; i < match.getStart(); i++) {
-//                System.err.println("STICA QUI 2.1 "+corpus);
+
 //                long end = start + tokens.get(i).getWord().length();
 //                helper.addSpan(wordLayerId, start, end, tokens.get(i).getWord());
 //                try {
-//                    System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() with corpus: " + kwic.getCorpus());
 //                    helper.addSpan(posLayerId, start, end, SUCTranslator.fromSUC(tokens.get(i).getMsd()).get(0));
 //                } catch (SRUException se) {
 //                    se.printStackTrace();
 //                }
 //                try{
-//                    System.err.println("STICA QUI 2.2 "+corpus);
 //                //helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma());
 //                start = end + 1;
 //                }
@@ -343,9 +332,9 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
 //                
 //            }
 //        } else {
-//            System.out.println("STICA DUNNO se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() " + corpus);
+//            System.out.println( DUNNO se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() " + corpus);
 //        }
-//        System.err.println("STICA QUI 3 "+corpus);
+
 //
 //        for (int i = match.getStart(); i < match.getEnd(); i++) {
 //            long end = start + tokens.get(i).getWord().length();
@@ -353,7 +342,6 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
 //            try {
 //                helper.addSpan(posLayerId, start, end, SUCTranslator.fromSUC(tokens.get(i).getMsd()).get(0), 1);
 //            } catch (SRUException se) {
-//                System.out.println("STICA MESS se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() "+se.getMessage());
 //            }
 //            helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma(), 1);
 //            start = end + 1;
@@ -379,10 +367,9 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
 //
 //        XMLStreamWriterHelper.writeEndResourceFragment(writer);
 //        XMLStreamWriterHelper.writeEndResource(writer);
-//        System.err.println("STICA QUI FINE "+corpus);
+//       
 //
 //    }
-
     /**
      * Serialize the current record in the requested format.
      *
@@ -409,59 +396,60 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
         List<Token> tokens = kwic.getTokens();
         Match match = kwic.getMatch();
         String corpus = kwic.getCorpus();
-        String tagset=getTagSetFromCorpus(kssrsProp, corpus);
-        POSTranslator posTranslator=null;
+       
+        String tagset = getTagSetFromCorpus(kssrsProp, corpus);
+        POSTranslator posTranslator = null;
         try {
-            posTranslator= POSTranslatorFactory.getPOSTranslator(tagset);
-            
+            posTranslator = POSTranslatorFactory.getPOSTranslator(tagset);
+
         } catch (SRUException ex) {
             java.util.logging.Logger.getLogger(KorpSRUSearchResultSet.class.getName()).log(Level.SEVERE, null, ex);
         }
+
         
-        // IT IS VERY BAD THAT ONLY ONE CORPUS CAN BE MANAGED
-        // LET'S TRY TO DO BETTER IN EXCEPTIONS?
-
-        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() " + corpus);
-
+        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() for corpus '{}'",corpus);
         XMLStreamWriterHelper.writeStartResource(writer, corpus + "-" + match.getPosition(), null);
         XMLStreamWriterHelper.writeStartResourceFragment(writer, null, null);
-        System.err.println("STICA QUI 1 "+corpus);
+        
         long start = 1;
         if (match.getStart() != 1) {
-            System.err.println("STICA QUI 2 "+corpus);
+            
             for (int i = 0; i < match.getStart(); i++) {
-                System.err.println("STICA QUI 2.1 "+corpus);
+                
                 long end = start + tokens.get(i).getWord().length();
                 helper.addSpan(wordLayerId, start, end, tokens.get(i).getWord());
                 try {
-                    System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() with corpus: " + kwic.getCorpus());
+                    
                     //helper.addSpan(posLayerId, start, end, SUCTranslator.fromSUC(tokens.get(i).getMsd()).get(0));
                     helper.addSpan(posLayerId, start, end, posTranslator.fromPos(tokens.get(i).getPos()).get(0));
                 } catch (SRUException se) {
+                   // LOG.debug("pos '{}' not found for corpus "+corpus+"",tokens.get(i).getPos());
+                    
+                   se.printStackTrace();
+                }
+                try {
+                    
+                    helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma());
+                    start = end + 1;
+                } catch (Exception se) {
                     se.printStackTrace();
                 }
-                try{
-                    System.err.println("STICA QUI 2.2 "+corpus);
-                //helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma());
-                start = end + 1;
-                }
-                catch (Exception se) {
-                    se.printStackTrace();
-                }
-                
+
             }
         } else {
-            System.out.println("STICA DUNNO se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() " + corpus);
+            //System.out.println("STICA DUNNO se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() " + corpus);
         }
-        System.err.println("STICA QUI 3 "+corpus);
 
         for (int i = match.getStart(); i < match.getEnd(); i++) {
             long end = start + tokens.get(i).getWord().length();
             helper.addSpan(wordLayerId, start, end, tokens.get(i).getWord(), 1);
             try {
                 helper.addSpan(posLayerId, start, end, posTranslator.fromPos(tokens.get(i).getPos()).get(0), 1);
+                
             } catch (SRUException se) {
-                System.out.println("STICA MESS se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() "+se.getMessage());
+                
+                se.printStackTrace();
+
             }
             helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma(), 1);
             start = end + 1;
@@ -487,9 +475,10 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
 
         XMLStreamWriterHelper.writeEndResourceFragment(writer);
         XMLStreamWriterHelper.writeEndResource(writer);
-        System.err.println("STICA QUI FINE "+corpus);
+        
 
     }
+
     /**
      * Check, if extra record data should be serialized for the current record.
      * The default implementation returns <code>false</code>.
@@ -517,24 +506,24 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
     public void writeExtraRecordData(XMLStreamWriter writer)
             throws XMLStreamException {
     }
-    
+
     public static String getTagSetFromCorpus(Properties prop, String corpus) {
         String temp = prop.getProperty("CORPORA2POS");
         List<String> mappedList = Collections.unmodifiableList(Arrays.asList(temp.split(",")));
         Map<String, String> map = new HashMap<String, String>();
         String tagset;
-        String pos="", pcorpus="";
-        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getTagSetFromCorpus() "+mappedList);
+        String pos = "", pcorpus = "";
+        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.getTagSetFromCorpus() " + mappedList);
         for (String mapped : mappedList) {
             pcorpus = mapped.split("=")[0];
             pos = mapped.split("=")[1];
-            
-            System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getTagSetFromCorpus() Inserting key "+pcorpus+ " with value "+pos);
+
+            //System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getTagSetFromCorpus() Inserting key " + pcorpus + " with value " + pos);
             map.put(pcorpus, pos);
-     
+
         }
-        tagset=map.get(corpus);
-        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getTagSetFromCorpus() Getting tagset "+tagset+ " for value "+corpus+ " "+map.keySet());
+        tagset = map.get(corpus);
+        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.data.KorpSRUSearchResultSet.getTagSetFromCorpus() Getting tagset " + tagset + " for value " + corpus + " " + map.keySet());
 
         return tagset;
     }

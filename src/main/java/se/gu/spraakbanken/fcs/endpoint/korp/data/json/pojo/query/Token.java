@@ -37,6 +37,7 @@ public class Token {
      */
     @JsonProperty("lemma")
     public String getLemma() {
+        
         return lemma;
     }
 
