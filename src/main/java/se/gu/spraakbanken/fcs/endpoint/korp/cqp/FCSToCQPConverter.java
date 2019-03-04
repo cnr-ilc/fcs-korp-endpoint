@@ -37,6 +37,7 @@ import eu.clarin.sru.server.fcs.parser.QueryNode;
 import eu.clarin.sru.server.fcs.parser.QuerySegment;
 import eu.clarin.sru.server.fcs.parser.QuerySequence;
 import eu.clarin.sru.server.fcs.parser.RegexFlag;
+import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo;
 
 
 /**
@@ -44,6 +45,21 @@ import eu.clarin.sru.server.fcs.parser.RegexFlag;
  *
  */
 public class FCSToCQPConverter {
+
+    /**
+     * @return the corporaInfo
+     */
+    public CorporaInfo getCorporaInfo() {
+        return corporaInfo;
+    }
+
+    /**
+     * @param corporaInfo the corporaInfo to set
+     */
+    public void setCorporaInfo(CorporaInfo corporaInfo) {
+        this.corporaInfo = corporaInfo;
+    }
+    private CorporaInfo corporaInfo;
     private static final Logger LOG =
             LoggerFactory.getLogger(FCSToCQPConverter.class);
 
@@ -123,6 +139,7 @@ public class FCSToCQPConverter {
 	throws SRUException {
         QueryNode tree = query.getParsedQuery();
         LOG.debug("FCS-Query: {}", tree.toString());
+        //System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.cqp.FCSToCQPConverter.makeCQPFromFCS() FCS-Query:"+ tree.toString());
 	
         // A somewhat crude query translator
         if (tree instanceof QuerySequence) {
@@ -224,7 +241,8 @@ public class FCSToCQPConverter {
     private static String translatePos(final String layerIdentifier, final String operator, final String pos) throws SRUException {
 	List<String> sucT = SUCTranslator.toSUC(pos);
 	StringBuffer buf = new StringBuffer();
-
+        LOG.debug("se.gu.spraakbanken.fcs.endpoint.korp.cqp.FCSToCQPConverter.translatePos() '{}'",pos);
+        //System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.cqp.FCSToCQPConverter.translatePos() "+pos);
 	buf.append(layerIdentifier);
 	buf.append(" ");
 	buf.append(operator);

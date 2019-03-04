@@ -126,7 +126,7 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
         currentRecordCursor = startRecord - 1;
         maximumRecords = startRecord - 1 + request.getMaximumRecords();
         recordCount = request.getMaximumRecords();
-        
+
     }
 
     protected KorpSRUSearchResultSet(SRUServerConfig serverConfig, SRUDiagnosticList diagnostics, final Query resultSet, final String query, final CorporaInfo corporaInfo) {
@@ -138,8 +138,7 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
         this.maximumRecords = 250;
         this.currentRecordCursor = startRecord - 1;
         this.recordCount = 250;
-        
-        
+
     }
 
     /**
@@ -305,16 +304,12 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
 //        Match match = kwic.getMatch();
 //        String corpus = kwic.getCorpus();
 //
-
 //
 //        XMLStreamWriterHelper.writeStartResource(writer, corpus + "-" + match.getPosition(), null);
 //        XMLStreamWriterHelper.writeStartResourceFragment(writer, null, null);
-
 //        long start = 1;
 //        if (match.getStart() != 1) {
-
 //            for (int i = 0; i < match.getStart(); i++) {
-
 //                long end = start + tokens.get(i).getWord().length();
 //                helper.addSpan(wordLayerId, start, end, tokens.get(i).getWord());
 //                try {
@@ -334,7 +329,6 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
 //        } else {
 //            System.out.println( DUNNO se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() " + corpus);
 //        }
-
 //
 //        for (int i = match.getStart(); i < match.getEnd(); i++) {
 //            long end = start + tokens.get(i).getWord().length();
@@ -396,9 +390,10 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
         List<Token> tokens = kwic.getTokens();
         Match match = kwic.getMatch();
         String corpus = kwic.getCorpus();
-       
+
         String tagset = getTagSetFromCorpus(kssrsProp, corpus);
         POSTranslator posTranslator = null;
+        String logMess = "";
         try {
             posTranslator = POSTranslatorFactory.getPOSTranslator(tagset);
 
@@ -406,38 +401,41 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
             java.util.logging.Logger.getLogger(KorpSRUSearchResultSet.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        
-        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() for corpus '{}'",corpus);
+        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() for corpus '{}'", corpus);
         XMLStreamWriterHelper.writeStartResource(writer, corpus + "-" + match.getPosition(), null);
         XMLStreamWriterHelper.writeStartResourceFragment(writer, null, null);
-        
+
         long start = 1;
         if (match.getStart() != 1) {
-            
+
             for (int i = 0; i < match.getStart(); i++) {
-                
+
                 long end = start + tokens.get(i).getWord().length();
                 helper.addSpan(wordLayerId, start, end, tokens.get(i).getWord());
                 try {
-                    
+
                     //helper.addSpan(posLayerId, start, end, SUCTranslator.fromSUC(tokens.get(i).getMsd()).get(0));
                     helper.addSpan(posLayerId, start, end, posTranslator.fromPos(tokens.get(i).getPos()).get(0));
                 } catch (SRUException se) {
-                   // LOG.debug("pos '{}' not found for corpus "+corpus+"",tokens.get(i).getPos());
-                    
-                   se.printStackTrace();
+                    posTranslator.getClass().getCanonicalName();
+                    // LOG.debug("pos '{}' not found for corpus "+corpus+"",tokens.get(i).getPos());
+                    logMess = " For POSTransalator " + posTranslator.getClass().getCanonicalName();
+                    LOG.info("Error '{}'", se.getDiagnostic().getMessage() + logMess);
+                    //System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() Error '{}'" + se.getDiagnostic().getMessage() + logMess);
+
                 }
                 try {
-                    
+
                     helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma());
                     start = end + 1;
                 } catch (Exception se) {
-                    se.printStackTrace();
+                    //System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() Error '{}'" + se.getMessage() + logMess);
+                    LOG.info("Error '{}'", se.getMessage());
                 }
 
             }
         } else {
-            //System.out.println("STICA DUNNO se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() " + corpus);
+            //System.out.println("DUNNO se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() " + corpus);
         }
 
         for (int i = match.getStart(); i < match.getEnd(); i++) {
@@ -445,14 +443,19 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
             helper.addSpan(wordLayerId, start, end, tokens.get(i).getWord(), 1);
             try {
                 helper.addSpan(posLayerId, start, end, posTranslator.fromPos(tokens.get(i).getPos()).get(0), 1);
-                
+
             } catch (SRUException se) {
-                
-                se.printStackTrace();
+                logMess = " For POSTransalator " + posTranslator.getClass().getCanonicalName();
+                LOG.info("Error '{}'", se.getDiagnostic().getMessage() + logMess);
 
             }
-            helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma(), 1);
-            start = end + 1;
+            try {
+                helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma(), 1);
+                start = end + 1;
+            } catch (Exception se) {
+
+                LOG.info("Error '{}'", se.getMessage());
+            }
         }
 
         if (tokens.size() > match.getEnd()) {
@@ -475,7 +478,6 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
 
         XMLStreamWriterHelper.writeEndResourceFragment(writer);
         XMLStreamWriterHelper.writeEndResource(writer);
-        
 
     }
 
@@ -513,7 +515,7 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
         Map<String, String> map = new HashMap<String, String>();
         String tagset;
         String pos = "", pcorpus = "";
-        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.getTagSetFromCorpus() " + mappedList);
+        //System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.getTagSetFromCorpus() " + mappedList);
         for (String mapped : mappedList) {
             pcorpus = mapped.split("=")[0];
             pos = mapped.split("=")[1];
@@ -523,7 +525,7 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
 
         }
         tagset = map.get(corpus);
-        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.data.KorpSRUSearchResultSet.getTagSetFromCorpus() Getting tagset " + tagset + " for value " + corpus + " " + map.keySet());
+        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.getTagSetFromCorpus() Getting tagset " + tagset + " for value '{}'", corpus);
 
         return tagset;
     }

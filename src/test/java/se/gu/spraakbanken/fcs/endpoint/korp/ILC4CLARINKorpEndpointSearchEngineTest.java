@@ -41,6 +41,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import se.gu.spraakbanken.fcs.endpoint.korp.cqp.FCSToCQPConverter;
+import se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.*;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.query.Query;
 import se.gu.spraakbanken.fcs.endpoint.korp.utils.ReadExternalPropFiles;
@@ -255,6 +256,8 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         System.out.println(resActual);
         assertEquals(res, resActual);
     }
+    
+    
 
     @Test
     public void convertFCSLemma() throws SRUException {
@@ -372,7 +375,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         Properties prop = kese.getKeseProp();
         CorporaInfo openCorporaInfo = kese.getCorporaInfo();
         final String query = "[word = 'trasformato'][pos = 'VERB']";
-        final String cqpQuery = "[word = \"trasformato\"]"; //[pos = 'VERB']";
+        final String cqpQuery = "[word = \"trasformato\" & pos = \"A00\"]"; //[pos = 'VERB']";
         //params
         //Query queryRes = kese.makeQuery(cqpQuery, openCorporaInfo, 0, 25);
         Query queryRes = kese.makeIlc4ClarinQuery(prop, cqpQuery, openCorporaInfo, 1, 250);
@@ -409,11 +412,14 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         //SRURequest request = new SRURequestImpl(config, queryParsers, new HttpServletRequestWrapper());
         //SRUSearchResultSet ssrs = kese.search(config, request, diagnostics);
         Properties prop = kese.getKeseProp();
-        CorporaInfo ci = CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/riccardo");
+        CorporaInfo ci = CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/parole");
         System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.selectedCorporaInfo() " + ci.getCorpora());
 
-        final String query = "[word = 'dispersa'][pos = 'VERB']";
-        final String cqpQuery = "[word = \"I\"]"; //[pos = 'VERB']";
+        final String query = "[ word = 'dispersa' & pos = 'AQ0FS00' ]";//"[word = 'dispersa'][word != 'sono']";
+        //final String query = "[word = 'dispersa'][pos = 'VERB']";
+        //final String cqpQuery = query; //"[word = \"I\"]"; //[pos = 'VERB']";
+        final String cqpQuery ="[lemma='disperdere']";//[ word = 'dispersa' & pos = 'AQ0FS00' ]";//[word = \"I\"]"; //[pos = 'VERB']";
+        //final String cqpQuery="[ word %3D \"dispersa\" ][ word !%3D \"sono\" ]";
         //params
         //Query queryRes = kese.makeQuery(cqpQuery, openCorporaInfo, 0, 25);
         Query queryRes = kese.makeIlc4ClarinQuery(prop, cqpQuery, ci, 1, 250);
@@ -422,12 +428,13 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         StringWriter sw = new StringWriter();
         XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newFactory();
         XMLStreamWriter xmlStreamWriter = xmlOutputFactory.createXMLStreamWriter(sw);
+        System.out.println("STICATEST se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.selectedCorporaInfo() "+queryRes.getQuerydata());
         try {
             System.out.println("getCurrentRecordCursor 0: " + kssrs.getCurrentRecordCursor());
             if (kssrs.nextRecord()) {
-                System.out.println("search1-selectedCorporaInfo b4: " + sw.toString());
+                System.out.println("selectedCorporaInfo-selectedCorporaInfo b4: " + sw.toString());
                 kssrs.writeRecord(xmlStreamWriter);
-                System.out.println("search1-selectedCorporaInfo after: " + sw.toString());
+                System.out.println("selectedCorporaInfo-selectedCorporaInfo after: " + sw.toString());
 
             } else {
                 System.out.println("getRecordCount: " + kssrs.getRecordCount());
@@ -445,6 +452,69 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         assertNotNull(sw.toString());
 
         //assertEquals(res, resActual);
+    }
+    
+    @Test
+    public void ilc4ClarinConvertQuery() throws SRUException, SRUConfigException, XMLStreamException {
+        
+        
+        SRUDiagnosticList diagnostics = new Diagnostic();
+        kese.doInit(config, new SRUQueryParserRegistry.Builder().register(new FCSQueryParser()), params);
+        //final String query = "[word = 'användning' & pos = 'NOUN']";
+        final String query ="[ word = 'dispersa' & pos = 'AQ0FS00' ]";
+        final String res = "[word = 'Basilicata' & pos = '(PROPN|NP00000|NP00G00|NP00O00|NP00SP0|NP00V00)']";
+        params.put("query", query);
+        Properties prop = kese.getKeseProp();
+        CorporaInfo ci = CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/riccardo,hdl:20.500.11752/parole");
+        System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.ilc4ClarinConvertQuery() " + ci.getCorpora());
+        //params.put("query", "[text = 'användning']");
+       
+        final String resActual = Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS((new FCSQueryParser()).parseQuery(SRUVersion.VERSION_2_0, params, diagnostics),ci, prop);
+
+        System.out.println(resActual);
+        assertEquals(res, resActual);
+        
+
+        
+        //SRURequest request = new SRURequestImpl(config, queryParsers, new HttpServletRequestWrapper());
+        //SRUSearchResultSet ssrs = kese.search(config, request, diagnostics);
+        
+        
+
+        
+        
+    }
+    
+    @Test
+    public void ilc4ClarinTestConvertQuery() throws SRUException, SRUConfigException, XMLStreamException {
+        
+        
+        SRUDiagnosticList diagnostics = new Diagnostic();
+        kese.doInit(config, new SRUQueryParserRegistry.Builder().register(new FCSQueryParser()), params);
+        //final String query = "[word = 'användning' & pos = 'NOUN']";
+         String query=""; //="[ word = 'Basilicata' & pos = 'PROPN' ]";
+        query ="[ lemma = '.*disperdere.*']";
+        final String res = "[word = 'Basilicata' & pos = '(PROPN|NP00000|NP00G00|NP00O00|NP00SP0|NP00V00)']";
+        params.put("query", query);
+        Properties prop = kese.getKeseProp();
+        CorporaInfo ci = CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/riccardo,hdl:20.500.11752/parole");
+        System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.ilc4ClarinTestConvertQuery() " + ci.getCorpora());
+        //params.put("query", "[text = 'användning']");
+       
+        final String resActual = Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS((new FCSQueryParser()).parseQuery(SRUVersion.VERSION_2_0, params, diagnostics),ci, prop);
+
+        System.out.println(resActual);
+        
+        
+
+        
+        //SRURequest request = new SRURequestImpl(config, queryParsers, new HttpServletRequestWrapper());
+        //SRUSearchResultSet ssrs = kese.search(config, request, diagnostics);
+        
+        
+
+        
+        
     }
 
     @AfterClass
