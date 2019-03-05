@@ -46,11 +46,9 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.clarin.sru.server.SRUServer;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Properties;
 
-import se.gu.spraakbanken.fcs.endpoint.korp.cqp.FCSToCQPConverter;
+import se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.ServiceInfo;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.query.Query;
@@ -397,6 +395,38 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
             throws SRUException {
         CorporaInfo contextedCorpora = new CorporaInfo();
         String query;
+        boolean hasFcsContextCorpus = false;
+        String fcsContextCorpus = "";
+        for (String erd : request.getExtraRequestDataNames()) {
+            if ("x-fcs-context".equals(erd)) {
+                hasFcsContextCorpus = true;
+                fcsContextCorpus = request.getExtraRequestData("x-fcs-context");
+                LOG.debug("se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() with context '{}'", fcsContextCorpus);
+                break;
+            }
+        }
+
+        if (hasFcsContextCorpus && !"".equals(fcsContextCorpus)) {
+
+            //  if (!"hdl%3A20%2E500%2E11752%2Fcorpora".equals(fcsContextCorpus)) {
+            if (!getKeseProp().getProperty("DEFCONTEXT").equals(fcsContextCorpus)) {
+                LOG.info("Loading specific corpus data: '{}'", fcsContextCorpus);
+
+                contextedCorpora = CorporaInfo.selectedCorporaInfo(keseProp, fcsContextCorpus);
+
+            } else {
+                contextedCorpora = openCorporaInfo;
+                LOG.info("No context specified: '{}'", fcsContextCorpus);
+
+            }
+            // hdl%3A10794%2Fsbmoderna is the default
+        } else {
+            LOG.info("No context specified: '{}'", fcsContextCorpus);
+
+            contextedCorpora = openCorporaInfo;
+        }
+        
+        
         if (request.isQueryType(Constants.FCS_QUERY_TYPE_CQL)) {
             /*
              * Got a CQL query (either SRU 1.1 or higher).
@@ -404,7 +434,8 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
              */
             final CQLQueryParser.CQLQuery q
                     = request.getQuery(CQLQueryParser.CQLQuery.class);
-            query = FCSToCQPConverter.makeCQPFromCQL(q);
+            
+            query = Ilc4ClarinFCSToCQPConverter.makeCQPFromCQL(q);
         } else if (request.isQueryType(Constants.FCS_QUERY_TYPE_FCS)) {
             /*
              * Got a FCS query (SRU 2.0).
@@ -412,7 +443,7 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
              */
             final FCSQueryParser.FCSQuery q
                     = request.getQuery(FCSQueryParser.FCSQuery.class);
-            query = FCSToCQPConverter.makeCQPFromFCS(q);
+            query = Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS(q, contextedCorpora, getKeseProp());
         } else {
             /*
              * Got something else we don't support. Send error ...
@@ -423,41 +454,8 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
                     + request.getQueryType()
                     + "' are not supported by this CLARIN-FCS Endpoint.");
         }
-
-        boolean hasFcsContextCorpus = false;
-        String fcsContextCorpus = "";
-        for (String erd : request.getExtraRequestDataNames()) {
-            if ("x-fcs-context".equals(erd)) {
-                hasFcsContextCorpus = true;
-                fcsContextCorpus = request.getExtraRequestData("x-fcs-context");
-                LOG.debug("se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() with context '{}'",fcsContextCorpus);
-                break;
-            }
-        }
-
-        if (hasFcsContextCorpus && !"".equals(fcsContextCorpus)) {
-
-            //  if (!"hdl%3A20%2E500%2E11752%2Fcorpora".equals(fcsContextCorpus)) {
-            if (!getKeseProp().getProperty("DEFCONTEXT").equals(fcsContextCorpus)) {
-                LOG.info("Loading specific corpus data: '{}'", fcsContextCorpus);
-                
-                contextedCorpora=CorporaInfo.selectedCorporaInfo(keseProp, fcsContextCorpus);
-                
-
-               
-            } else {
-                contextedCorpora = openCorporaInfo;
-                LOG.info("No context specified: '{}'", fcsContextCorpus);
-               
-            }
-            // hdl%3A10794%2Fsbmoderna is the default
-        } else {
-            LOG.info("No context specified: '{}'", fcsContextCorpus);
-            
-            contextedCorpora = openCorporaInfo;
-        }
-
-       
+        //System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() "+query);
+        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() '{}'",query);
 
         //Query queryRes = makeQuery(query, openCorporaInfo, request.getStartRecord(), request.getMaximumRecords());
         //Query queryRes = makeIlc4ClarinQuery(getKeseProp(), query, openCorporaInfo, request.getStartRecord(), request.getMaximumRecords());
@@ -507,6 +505,8 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
 
     protected Query makeIlc4ClarinQuery(Properties prop, final String cqpQuery, CorporaInfo openCorporaInfo, final int startRecord, final int maximumRecords) {
         ObjectMapper mapper = new ObjectMapper();
+        //System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() " + cqpQuery);
+        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() " + cqpQuery);
         String wsString = ManageProperties.createKorpUrl(prop);//"https://spraakbanken.gu.se/ws/korp/v6/?";
         String queryString = "query?defaultcontext=1+sentence&show=msd,lemma,pos&cqp=";
         String startParam = "&start=" + (startRecord == 1 ? 0 : startRecord - 1);
@@ -515,13 +515,13 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
         //"SUC2";
         String corpusParamValues = CorporaInfo.getCorpusParameterValues(openCorporaInfo.getCorpora().keySet());
         try {
+            System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() " + wsString + queryString + URLEncoder.encode(cqpQuery, "UTF-8") + startParam + endParam + corpusParam + corpusParamValues);
             URL korp = new URL(wsString + queryString + URLEncoder.encode(cqpQuery, "UTF-8") + startParam + endParam + corpusParam + corpusParamValues);
             // mapper.reader(Query.class).readValue(korp.openStream());
             // truncates the query string 
             // using URLConnection.getInputStream() instead. /ljo
             URLConnection connection = korp.openConnection();
 
-           
             return mapper.readerFor(Query.class).readValue(connection.getInputStream());
         } catch (JsonParseException e) {
             // TODO Auto-generated catch block
