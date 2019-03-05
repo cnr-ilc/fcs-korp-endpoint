@@ -256,8 +256,6 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         System.out.println(resActual);
         assertEquals(res, resActual);
     }
-    
-    
 
     @Test
     public void convertFCSLemma() throws SRUException {
@@ -375,7 +373,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         Properties prop = kese.getKeseProp();
         CorporaInfo openCorporaInfo = kese.getCorporaInfo();
         final String query = "[word = 'trasformato'][pos = 'VERB']";
-        final String cqpQuery = "[word = \"trasformato\" & pos = \"A00\"]"; //[pos = 'VERB']";
+        final String cqpQuery = "[word = \"trasformato\"]"; //[pos = 'VERB']";
         //params
         //Query queryRes = kese.makeQuery(cqpQuery, openCorporaInfo, 0, 25);
         Query queryRes = kese.makeIlc4ClarinQuery(prop, cqpQuery, openCorporaInfo, 1, 250);
@@ -418,7 +416,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         final String query = "[ word = 'dispersa' & pos = 'AQ0FS00' ]";//"[word = 'dispersa'][word != 'sono']";
         //final String query = "[word = 'dispersa'][pos = 'VERB']";
         //final String cqpQuery = query; //"[word = \"I\"]"; //[pos = 'VERB']";
-        final String cqpQuery ="[lemma='disperdere']";//[ word = 'dispersa' & pos = 'AQ0FS00' ]";//[word = \"I\"]"; //[pos = 'VERB']";
+        final String cqpQuery = "[lemma='disperdere']";//[ word = 'dispersa' & pos = 'AQ0FS00' ]";//[word = \"I\"]"; //[pos = 'VERB']";
         //final String cqpQuery="[ word %3D \"dispersa\" ][ word !%3D \"sono\" ]";
         //params
         //Query queryRes = kese.makeQuery(cqpQuery, openCorporaInfo, 0, 25);
@@ -428,7 +426,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         StringWriter sw = new StringWriter();
         XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newFactory();
         XMLStreamWriter xmlStreamWriter = xmlOutputFactory.createXMLStreamWriter(sw);
-        System.out.println("STICATEST se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.selectedCorporaInfo() "+queryRes.getQuerydata());
+        System.out.println("STICATEST se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.selectedCorporaInfo() " + queryRes.getQuerydata());
         try {
             System.out.println("getCurrentRecordCursor 0: " + kssrs.getCurrentRecordCursor());
             if (kssrs.nextRecord()) {
@@ -453,68 +451,91 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
 
         //assertEquals(res, resActual);
     }
-    
-    @Test
+
+    // @Test
     public void ilc4ClarinConvertQuery() throws SRUException, SRUConfigException, XMLStreamException {
-        
-        
+
         SRUDiagnosticList diagnostics = new Diagnostic();
         kese.doInit(config, new SRUQueryParserRegistry.Builder().register(new FCSQueryParser()), params);
         //final String query = "[word = 'användning' & pos = 'NOUN']";
-        final String query ="[ word = 'dispersa' & pos = 'AQ0FS00' ]";
-        final String res = "[word = 'Basilicata' & pos = '(PROPN|NP00000|NP00G00|NP00O00|NP00SP0|NP00V00)']";
+        String query = "[ word = 'Basilicata' & pos = 'PROPN' ]";
+        //final String res = "[word = 'Basilicata' & pos = '(PROPN|NP00000|NP00G00|NP00O00|NP00SP0|NP00V00)']";
+        final String res = "[word = 'Basilicata' & pos = '(PROPN|NP.*)']";
         params.put("query", query);
         Properties prop = kese.getKeseProp();
-        CorporaInfo ci = CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/riccardo,hdl:20.500.11752/parole");
+        CorporaInfo ci = CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/riccardo");
         System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.ilc4ClarinConvertQuery() " + ci.getCorpora());
         //params.put("query", "[text = 'användning']");
-       
-        final String resActual = Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS((new FCSQueryParser()).parseQuery(SRUVersion.VERSION_2_0, params, diagnostics),ci, prop);
+
+        final String resActual = Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS((new FCSQueryParser()).parseQuery(SRUVersion.VERSION_2_0, params, diagnostics), ci, prop);
 
         System.out.println(resActual);
         assertEquals(res, resActual);
-        
 
-        
         //SRURequest request = new SRURequestImpl(config, queryParsers, new HttpServletRequestWrapper());
         //SRUSearchResultSet ssrs = kese.search(config, request, diagnostics);
-        
-        
-
-        
-        
     }
-    
+
     @Test
     public void ilc4ClarinTestConvertQuery() throws SRUException, SRUConfigException, XMLStreamException {
-        
-        
+
         SRUDiagnosticList diagnostics = new Diagnostic();
         kese.doInit(config, new SRUQueryParserRegistry.Builder().register(new FCSQueryParser()), params);
         //final String query = "[word = 'användning' & pos = 'NOUN']";
-         String query=""; //="[ word = 'Basilicata' & pos = 'PROPN' ]";
-        query ="[ lemma = '.*disperdere.*']";
+        String queryExp = "[ word = \"dispersa\" ]"; //ok
+        String queryExp1 = "[ word = \"dispersa\" ] [ pos = \"VERB\" ]"; //ok
+        String queryAnd = "[ word = \"dispersa\" & pos = \"VERB\" ]"; //ok
+        String queryGroup = "[ ( word = \"dispersa\" | pos = \"VERB\" ) ]";  //ok
+        String queryOr = "[  word = \"dispersa\" | pos = \"VERB\"  ]"; //ok
+        String queryOrOr = "[  word = \"dispersa\" | pos = \"VERB\" | lemma = \"disperdere\" ]";  //ok
+        String queryOrAnd = "[  word = \"dispersa\" | pos = \"VERB\"  & lemma = \"disperdere\" ]"; //KO
+        String queryGroupGroup = "[ ( word = \"dispersa\" | pos = \"VERB\" | lemma = \"disperdere\" ) ]"; //ok
+        //String query = " [ (word = \"dispersa\" | lemma = \"disperdere\" | pos = \"VERB\" )]";//[ word = 'Basilicata' & pos = 'PROPN' ]";
+        //query = "[ word = \"dispersa\" ] [ pos = \"ADJ\" ]";
+        //query ="[ lemma = '.*disperdere.*']";
         final String res = "[word = 'Basilicata' & pos = '(PROPN|NP00000|NP00G00|NP00O00|NP00SP0|NP00V00)']";
-        params.put("query", query);
+        params.put("query", queryOrAnd);
         Properties prop = kese.getKeseProp();
         CorporaInfo ci = CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/riccardo,hdl:20.500.11752/parole");
-        System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.ilc4ClarinTestConvertQuery() " + ci.getCorpora());
+        System.out.println("STICATEST se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.ilc4ClarinTestConvertQuery() " + ci.getCorpora());
         //params.put("query", "[text = 'användning']");
-       
-        final String resActual = Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS((new FCSQueryParser()).parseQuery(SRUVersion.VERSION_2_0, params, diagnostics),ci, prop);
 
-        System.out.println(resActual);
-        
-        
+        final String cqpQuery = Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS((new FCSQueryParser()).parseQuery(SRUVersion.VERSION_2_0, params, diagnostics), ci, prop);
+        Query queryRes = kese.makeIlc4ClarinQuery(prop, cqpQuery, ci, 1, 250);
+        System.out.println(cqpQuery);
 
-        
         //SRURequest request = new SRURequestImpl(config, queryParsers, new HttpServletRequestWrapper());
         //SRUSearchResultSet ssrs = kese.search(config, request, diagnostics);
-        
-        
+    }
 
-        
-        
+    @Test
+    public void testSubStringPos() throws SRUException, SRUConfigException, XMLStreamException {
+        String pos = "NP0000";
+        if (pos.length() >= 2) {
+            pos = pos.substring(0, 2);
+        } else {
+            pos = pos.substring(0, 1);
+        }
+        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.testSubStringPos() B4 " + pos);
+        if (pos.startsWith("A")) {
+            pos = "A";
+        } else if (pos.startsWith("D")) {
+            pos = "D";
+        } else if (pos.startsWith("I")) {
+            pos = "I";
+        } else if (pos.startsWith("P")) {
+            pos = "P";
+        } else if (pos.startsWith("W")) {
+            pos = "W";
+        } else if (pos.startsWith("Z")) {
+            pos = "Z";
+        } else if (pos.startsWith("R")) {
+            pos = "R";
+        } else {
+            System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.testSubStringPos() M " + pos);
+        }
+        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.testSubStringPos() A " + pos);
+
     }
 
     @AfterClass

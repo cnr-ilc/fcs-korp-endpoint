@@ -21,6 +21,7 @@ public class POSTranslatorFactory {
     static {
         mapTranslator.put("EAGLES", new EAGLESTranslator());
         mapTranslator.put("UD", new UDTranslator());
+        mapTranslator.put("S-EAGLES", new SimEAGLESTranslator());
     }
     
     public static POSTranslator getPOSTranslator(String tagset) throws SRUException{
