@@ -421,7 +421,7 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
                     // LOG.debug("pos '{}' not found for corpus "+corpus+"",tokens.get(i).getPos());
                     logMess = " For POSTransalator " + posTranslator.getClass().getCanonicalName();
                     LOG.info("Error '{}'", se.getDiagnostic().getMessage() + logMess);
-                    //System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() Error '{}'" + se.getDiagnostic().getMessage() + logMess);
+                    System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() Error '{}'" + se.getDiagnostic().getMessage() + logMess);
 
                 }
                 try {
