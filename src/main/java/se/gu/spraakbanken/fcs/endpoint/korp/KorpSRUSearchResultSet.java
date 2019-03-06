@@ -44,6 +44,7 @@ import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.query.Kwic;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.query.Match;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.query.Query;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.query.Token;
+import se.gu.spraakbanken.fcs.endpoint.korp.utils.Utilities;
 
 /**
  * A result set of a <em>searchRetrieve</em> operation. It it used to iterate
@@ -391,7 +392,7 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
         Match match = kwic.getMatch();
         String corpus = kwic.getCorpus();
 
-        String tagset = getTagSetFromCorpus(kssrsProp, corpus);
+        String tagset = Utilities.getTagSetFromCorpus(kssrsProp, corpus);
         POSTranslator posTranslator = null;
         String logMess = "";
         try {
@@ -421,7 +422,7 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
                     // LOG.debug("pos '{}' not found for corpus "+corpus+"",tokens.get(i).getPos());
                     logMess = " For POSTransalator " + posTranslator.getClass().getCanonicalName();
                     LOG.info("Error '{}'", se.getDiagnostic().getMessage() + logMess);
-                    System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() Error '{}'" + se.getDiagnostic().getMessage() + logMess);
+                    //System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() Error '{}'" + se.getDiagnostic().getMessage() + logMess);
 
                 }
                 try {
@@ -509,25 +510,6 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
             throws XMLStreamException {
     }
 
-    public static String getTagSetFromCorpus(Properties prop, String corpus) {
-        String temp = prop.getProperty("CORPORA2POS");
-        List<String> mappedList = Collections.unmodifiableList(Arrays.asList(temp.split(",")));
-        Map<String, String> map = new HashMap<String, String>();
-        String tagset;
-        String pos = "", pcorpus = "";
-        //System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.getTagSetFromCorpus() " + mappedList);
-        for (String mapped : mappedList) {
-            pcorpus = mapped.split("=")[0];
-            pos = mapped.split("=")[1];
-
-            //System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getTagSetFromCorpus() Inserting key " + pcorpus + " with value " + pos);
-            map.put(pcorpus, pos);
-
-        }
-        tagset = map.get(corpus);
-        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.getTagSetFromCorpus() Getting tagset " + tagset + " for value '{}'", corpus);
-
-        return tagset;
-    }
+    
 
 }

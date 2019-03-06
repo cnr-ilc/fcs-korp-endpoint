@@ -443,7 +443,7 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
              */
             final FCSQueryParser.FCSQuery q
                     = request.getQuery(FCSQueryParser.FCSQuery.class);
-            query = Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS(q, contextedCorpora, getKeseProp());
+            query = Ilc4ClarinFCSToCQPConverter.makeIlc4ClarinCQPFromFCS(q, contextedCorpora, getKeseProp());
         } else {
             /*
              * Got something else we don't support. Send error ...
@@ -507,7 +507,7 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
         ObjectMapper mapper = new ObjectMapper();
         //System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() " + cqpQuery);
         LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() '{}'", cqpQuery);
-        System.out.println("STICAQUERY se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() " + cqpQuery);
+        
         String wsString = ManageProperties.createKorpUrl(prop);//"https://spraakbanken.gu.se/ws/korp/v6/?";
         String queryString = "query?defaultcontext=1+sentence&show=msd,lemma,pos&cqp=";
         String startParam = "&start=" + (startRecord == 1 ? 0 : startRecord - 1);
@@ -516,7 +516,7 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
         //"SUC2";
         String corpusParamValues = CorporaInfo.getCorpusParameterValues(openCorporaInfo.getCorpora().keySet());
         try {
-            System.out.println("STICAQUERY se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() " + wsString + queryString + URLEncoder.encode(cqpQuery, "UTF-8") + startParam + endParam + corpusParam + corpusParamValues);
+            System.out.println(" se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() " + wsString + queryString + URLEncoder.encode(cqpQuery, "UTF-8") + startParam + endParam + corpusParam + corpusParamValues);
             URL korp = new URL(wsString + queryString + URLEncoder.encode(cqpQuery, "UTF-8") + startParam + endParam + corpusParam + corpusParamValues);
             // mapper.reader(Query.class).readValue(korp.openStream());
             // truncates the query string 
