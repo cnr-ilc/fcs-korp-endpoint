@@ -42,6 +42,20 @@ import se.gu.spraakbanken.fcs.endpoint.korp.utils.Utilities;
 public class Ilc4ClarinFCSToCQPConverter {
 
     /**
+     * @return the children
+     */
+    public static List<String> getChildren() {
+        return children;
+    }
+
+    /**
+     * @param children the children to set
+     */
+    public static void setChildren(List<String> children) {
+        Ilc4ClarinFCSToCQPConverter.children = children;
+    }
+
+    /**
      * @return the prop
      */
     public static Properties getProp() {
@@ -72,6 +86,8 @@ public class Ilc4ClarinFCSToCQPConverter {
     private static Properties prop;
     private static final Logger LOG
             = LoggerFactory.getLogger(Ilc4ClarinFCSToCQPConverter.class);
+
+    private static List<String> children = new ArrayList<String>();
 
     /**
      *
@@ -145,28 +161,38 @@ public class Ilc4ClarinFCSToCQPConverter {
      * @throws eu.clarin.sru.server.SRUException If the query is too complex or
      * it for any other reason cannot be performed
      */
-    public static String makeCQPFromFCS(final SRUQuery<QueryNode> query, CorporaInfo contextedCorpora, Properties prop)
+    public static String makeIlc4ClarinCQPFromFCS(final SRUQuery<QueryNode> query, CorporaInfo contextedCorpora, Properties prop)
             throws SRUException {
+        String ret = "";
         setCorporaInfo(contextedCorpora);
         setProp(prop);
         QueryNode tree = query.getParsedQuery();
         LOG.debug("FCS-Query: {}", tree.toString());
         LOG.debug("FCS-Query Context: {}", contextedCorpora.getCorpora().keySet());
-        System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS() FCS-Query:" + tree.toString());
-        System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS() FCS-Query:" + tree.toString() + " Context: " + getCorporaInfo().getCorpora().keySet());
-        System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS() FCS-Query-Class " + tree.getClass().getCanonicalName());
+        
         // A somewhat crude query translator
         if (tree instanceof QuerySequence) {
-            return getQuerySequence(tree);
+            ret = getQuerySequence(tree);
+            
+            //return getQuerySequence(tree);
         } else if (tree instanceof QuerySegment) {
-            return getQuerySegment(tree);
+            ret = getQuerySegment(tree);
+           
         } else {
             throw new SRUException(
                     Constants.FCS_DIAGNOSTIC_GENERAL_QUERY_TOO_COMPLEX_CANNOT_PERFORM_QUERY,
                     "Endpoint only supports sequences or single segment queries");
         }
+        return ret;
     }
 
+    /**
+     * To manage queries such as [word='a'][pos='b']...
+     *
+     * @param tree the query sequence to parse
+     * @return a concatenation of querySegments
+     * @throws SRUException
+     */
     private static String getQuerySequence(final QueryNode tree) throws SRUException {
         List<String> children = new ArrayList<String>();
         QuerySequence sequence = (QuerySequence) tree;
@@ -184,35 +210,56 @@ public class Ilc4ClarinFCSToCQPConverter {
         return sb.toString();
     }
 
+    /**
+     *
+     * @param tree the query segment to parse
+     * @return converted segment
+     * @throws SRUException
+     */
     private static String getQuerySegment(final QueryNode tree) throws SRUException {
+        String ret = "";
+        
         QuerySegment segment = (QuerySegment) tree;
         QueryNode op = segment.getExpression();
-        System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS() FCS-Query-Class " + segment.getClass().getCanonicalName());
-        System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS() FCS-Query-Class " + op.getClass().getCanonicalName());
-        System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS() FCS-Query-Class " + op.getClass().getCanonicalName() + " " + op.toString());
+//        System.out.println("getQuerySegment 1 SEG HAS CLASS -" + segment.getClass().getCanonicalName() + "- and Expression " + segment.toString());
+//        System.out.println("getQuerySegment 2 OP HAS CLASS -" + op.getClass().getCanonicalName() + "- and Expression " + op.toString());
+
         if (op instanceof ExpressionAnd) {
-            System.out.println("STICAAND se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.getQuerySegment() " + op.toString());
-            return "[" + getExpressionBoolOp(op, " & ") + "]";
+            
+            //System.err.println("DA getQuerySegment INVOCO getExpressionBoolOp con AND Per Exp "+op.toString());
+            
+            ret = getExpressionBoolOp(op, " & ");
+            
         } else if (op instanceof ExpressionOr) {
-            System.out.println("STICAOR se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.getQuerySegment() " + op.toString());
-            return "[" + getExpressionBoolOp(op, " | ") + "]";
+            
+            //System.err.println("DA getQuerySegment INVOCO getExpressionBoolOp con OR Per Exp "+op.toString());;
+            
+            ret = getExpressionBoolOp(op, " | ");
+            
         } else if (op instanceof ExpressionGroup) {
-            System.out.println("STICAGROUP se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.getQuerySegment() " + op.toString());
-            return "[" + getExpressionGroupOp(op, " | ") + "]";
+            //System.err.println("DA getQuerySegment INVOCO getExpressionGroupOp Per Exp " +op.toString());
+            
+            ret=getExpressionGroupOp(op, "-");
         } else {
             String occurrences = getOccurrences(segment.getMinOccurs(), segment.getMaxOccurs());
             QueryNode child = segment.getExpression();
             if (child instanceof Expression) {
+                //System.err.println("DA getQuerySegment INVOCO getExpression con expression "+child);
+                
                 return "[" + getExpression((Expression) child) + "]" + occurrences;
             } else if (child instanceof ExpressionWildcard) {
                 return " []" + occurrences;
-            } else {
-                throw new SRUException(
-                        Constants.FCS_DIAGNOSTIC_GENERAL_QUERY_TOO_COMPLEX_CANNOT_PERFORM_QUERY,
-                        "Endpoint only supports sequences or single segment expressions");
+//            } else {
+//                throw new SRUException(
+//                        Constants.FCS_DIAGNOSTIC_GENERAL_QUERY_TOO_COMPLEX_CANNOT_PERFORM_QUERY,
+//                        "Endpoint only supports sequences or single segment expressions");
+//            }
             }
         }
+        
+        return "[ " + ret + " ]";
     }
+    
 
     private static String getOccurrences(final int min, final int max) {
         if (min == 1 && max == 1) {
@@ -225,55 +272,90 @@ public class Ilc4ClarinFCSToCQPConverter {
     }
 
     private static String getExpressionBoolOp(final QueryNode op, final String opString) throws SRUException {
+        String ret = "";
         List<String> children = new ArrayList<String>();
-        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.getExpressionBoolOp() " + op.toString());
-        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.getExpressionBoolOp() " + op.getChildCount());
-
+       
         for (int i = 0; i < op.getChildCount(); i++) {
             QueryNode child = op.getChild(i);
-            System.out.println("STICABBOLOP se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.getExpressionBoolOp() " + child.toString());
-            System.out.println("STICABBOLOP se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.getExpressionBoolOp() " + child.toString() + " has class " + child.getClass().getCanonicalName());
+//            
             if (child instanceof Expression) {
+                //System.err.println("DA getExpressionBoolOp INVOCO getExpression con child "+child);
                 children.add(getExpression((Expression) child));
+                //setChildren(children);
             } else if (child instanceof ExpressionGroup) {
-                return "[" + getExpressionGroupOp(op, " | ") + "]";
+                //System.err.println("DA getExpressionBoolOp INVOCO getExpressionGroupOp con child "+child);
+                children.add(getExpressionGroupOp(child, opString));
+//              
+            } else if (child instanceof ExpressionAnd){
+                //System.err.println("DA getExpressionBoolOp INVOCO getExpressionBoolOp con AND "+child);
+                children.add(getExpressionBoolOp(child, " & "));
+            }
+            
+            else {
+                //System.out.println("\t\t DUNNO CLASS -" + child.getClass().getCanonicalName() + "- and OPSTRING " + opString);
             }
 
         }
-        System.out.println("STICABBOLOP se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.getExpressionBoolOp() SIZE " + children.size());
-        String ret = "";
-        int i=0;
+
+        int i = 0;
         for (String s : children) {
-            System.out.println("STICABBOLOP se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.getExpressionBoolOp() CH " + s);
-            if (i<children.size()-1)
-                ret=ret+s+opString;
-            else
-                ret=ret+s;
+            System.out.println("In getExpressionBoolOp CHILDREN CH " + s + " and OPSTRING " + opString);
+            if (i < children.size() - 1) {
+                ret = ret + s + opString;
+            } else {
+                ret = ret + s;
+            }
             i++;
         }
-        System.out.println("STICABBOLOP se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.getExpressionBoolOp() FINAL " + ret);
+       
         return ret;//children.get(0) + opString + children.get(1);
     }
 
+
     private static String getExpressionGroupOp(final QueryNode op, final String opString) throws SRUException {
         List<String> children = new ArrayList<String>();
-        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.getExpressionGroupOp() " + op.toString());
-        System.out.println("STICA se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.getExpressionGroupOp() " + op.getChildCount());
-        System.out.println("STICACLASSE se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.getExpressionGroupOp() CLASSE " + op.getClass().getCanonicalName());
+
         String ret = "";
         for (int i = 0; i < op.getChildCount(); i++) {
             QueryNode child = op.getChild(i);
-            System.out.println("STICACLASSE se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.getExpressionGroupOp() CLASSE " + child.getClass().getCanonicalName());
+//           
             if (child instanceof ExpressionOr) {
-                ret = getExpressionBoolOp(child, opString);
-                System.out.println("STICAFIGA se.gu.spraakbanken.fcs.endpoint.korp.cqp.Ilc4ClarinFCSToCQPConverter.getExpressionGroupOp() " + child.toString());
+                //System.err.println("DA getExpressionGroupOp INVOCO getExpressionBoolOp con OR "+child);
+                
+                ret = getExpressionBoolOp(child, " | ");
+//                
+            } else if (child instanceof ExpressionGroup) {
+                System.err.println("DA getExpressionGroupOp INVOCO getExpressionGroupOp");
+                ret = getExpressionGroupOp(child, opString);
+
+            }  else if (child instanceof ExpressionAnd) {
+                System.err.println("DA getExpressionGroupOp INVOCO getExpressionBoolOp con AND");
+                ret = getExpressionBoolOp(child, " & ");
+
+            } 
+            
+            else if (child instanceof Expression) {
+                children.add(getExpression((Expression) child));
+
+            } else {
+//               
             }
 //            if (child instanceof Expression) {
 //                children.add(getExpression((Expression) child));
 //            }
         }
-
-        return ret; //children.get(0) + opString + children.get(1);
+        int i = 0;
+        for (String s : children) {
+            //System.out.println("In getExpressionGroupOp CHILDREN " + s);
+            if (i < children.size() - 1) {
+                ret = ret + s + opString;
+            } else {
+                ret = ret + s;
+            }
+            i++;
+        }
+//        
+        return "("+ret+")"; //children.get(0) + opString + children.get(1);
     }
 
     private static String getExpression(final Expression child) throws SRUException {
@@ -283,8 +365,8 @@ public class Ilc4ClarinFCSToCQPConverter {
                 && (expression.getOperator() == Operator.EQUALS || expression.getOperator() == Operator.NOT_EQUALS) //&&
                 //(expression.getRegexFlags() == null)
                 ) {
-            // Not really worth it using regexFlags. 
-            // Still handled in getWordLayerFilter(). /ljo 
+            // Not really worth it using regexFlags.
+            // Still handled in getWordLayerFilter(). /ljo
 
             // Translate PoS value or just get the text/word layer as is.
             if (expression.getLayerIdentifier().equals("pos")) {
@@ -311,7 +393,7 @@ public class Ilc4ClarinFCSToCQPConverter {
         StringBuffer buf = new StringBuffer();
         List<String> returnList = new ArrayList<String>();
 
-        // GOOD the first 
+        // GOOD the first
         /*
         This method loops over passed corpora when the right translation is found
         the for cycle is breaked: otherwise it continues until the translator is found

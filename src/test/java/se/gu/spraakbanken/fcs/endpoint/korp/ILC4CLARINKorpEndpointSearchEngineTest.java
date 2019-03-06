@@ -426,7 +426,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         StringWriter sw = new StringWriter();
         XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newFactory();
         XMLStreamWriter xmlStreamWriter = xmlOutputFactory.createXMLStreamWriter(sw);
-        System.out.println("STICATEST se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.selectedCorporaInfo() " + queryRes.getQuerydata());
+        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.selectedCorporaInfo() " + queryRes.getQuerydata());
         try {
             System.out.println("getCurrentRecordCursor 0: " + kssrs.getCurrentRecordCursor());
             if (kssrs.nextRecord()) {
@@ -453,28 +453,28 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
     }
 
     // @Test
-    public void ilc4ClarinConvertQuery() throws SRUException, SRUConfigException, XMLStreamException {
-
-        SRUDiagnosticList diagnostics = new Diagnostic();
-        kese.doInit(config, new SRUQueryParserRegistry.Builder().register(new FCSQueryParser()), params);
-        //final String query = "[word = 'användning' & pos = 'NOUN']";
-        String query = "[ word = 'Basilicata' & pos = 'PROPN' ]";
-        //final String res = "[word = 'Basilicata' & pos = '(PROPN|NP00000|NP00G00|NP00O00|NP00SP0|NP00V00)']";
-        final String res = "[word = 'Basilicata' & pos = '(PROPN|NP.*)']";
-        params.put("query", query);
-        Properties prop = kese.getKeseProp();
-        CorporaInfo ci = CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/riccardo");
-        System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.ilc4ClarinConvertQuery() " + ci.getCorpora());
-        //params.put("query", "[text = 'användning']");
-
-        final String resActual = Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS((new FCSQueryParser()).parseQuery(SRUVersion.VERSION_2_0, params, diagnostics), ci, prop);
-
-        System.out.println(resActual);
-        assertEquals(res, resActual);
-
-        //SRURequest request = new SRURequestImpl(config, queryParsers, new HttpServletRequestWrapper());
-        //SRUSearchResultSet ssrs = kese.search(config, request, diagnostics);
-    }
+//    public void ilc4ClarinConvertQuery() throws SRUException, SRUConfigException, XMLStreamException {
+//
+//        SRUDiagnosticList diagnostics = new Diagnostic();
+//        kese.doInit(config, new SRUQueryParserRegistry.Builder().register(new FCSQueryParser()), params);
+//        //final String query = "[word = 'användning' & pos = 'NOUN']";
+//        String query = "[ word = 'Basilicata' & pos = 'PROPN' ]";
+//        //final String res = "[word = 'Basilicata' & pos = '(PROPN|NP00000|NP00G00|NP00O00|NP00SP0|NP00V00)']";
+//        final String res = "[word = 'Basilicata' & pos = '(PROPN|NP.*)']";
+//        params.put("query", query);
+//        Properties prop = kese.getKeseProp();
+//        CorporaInfo ci = CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/riccardo");
+//        System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.ilc4ClarinConvertQuery() " + ci.getCorpora());
+//        //params.put("query", "[text = 'användning']");
+//
+//        final String resActual = Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS((new FCSQueryParser()).parseQuery(SRUVersion.VERSION_2_0, params, diagnostics), ci, prop);
+//
+//        System.out.println(resActual);
+//        assertEquals(res, resActual);
+//
+//        //SRURequest request = new SRURequestImpl(config, queryParsers, new HttpServletRequestWrapper());
+//        //SRUSearchResultSet ssrs = kese.search(config, request, diagnostics);
+//    }
 
     @Test
     public void ilc4ClarinTestConvertQuery() throws SRUException, SRUConfigException, XMLStreamException {
@@ -482,25 +482,40 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         SRUDiagnosticList diagnostics = new Diagnostic();
         kese.doInit(config, new SRUQueryParserRegistry.Builder().register(new FCSQueryParser()), params);
         //final String query = "[word = 'användning' & pos = 'NOUN']";
-        String queryExp = "[ word = \"dispersa\" ]"; //ok
-        String queryExp1 = "[ word = \"dispersa\" ] [ pos = \"VERB\" ]"; //ok
+        String queryExp = "[ word = \"dispersa\" ]"; //ok 
+        String querySeq = "[ word = \"dispersa\" ] [ pos = \"VERB\" ]"; //ok
+        
         String queryAnd = "[ word = \"dispersa\" & pos = \"VERB\" ]"; //ok
-        String queryGroup = "[ ( word = \"dispersa\" | pos = \"VERB\" ) ]";  //ok
+        String queryAndAnd = "[ word = \"dispersa\" & pos = \"VERB\" & lemma = \"disperdere\" ]"; //ok
+        
         String queryOr = "[  word = \"dispersa\" | pos = \"VERB\"  ]"; //ok
         String queryOrOr = "[  word = \"dispersa\" | pos = \"VERB\" | lemma = \"disperdere\" ]";  //ok
-        String queryOrAnd = "[  word = \"dispersa\" | pos = \"VERB\"  & lemma = \"disperdere\" ]"; //KO
-        String queryGroupGroup = "[ ( word = \"dispersa\" | pos = \"VERB\" | lemma = \"disperdere\" ) ]"; //ok
-        //String query = " [ (word = \"dispersa\" | lemma = \"disperdere\" | pos = \"VERB\" )]";//[ word = 'Basilicata' & pos = 'PROPN' ]";
+        
+        String queryGroupWithOr = "[ ( word = \"dispersa\" | pos = \"VERB\" ) ]";  //ok
+        String queryGroupWithAnd = "[ ( word = \"dispersa\" & pos = \"VERB\" ) ]"; //ok
+        
+        String queryGroupAnd = "[ ( word = \"dispersa\" | pos = \"VERB\" ) & lemma = \"disperdere\" ]"; //ok
+        String queryGroupAnd1     = "[lemma = \"disperdere\" & ( word = \"dispersa\" | pos = \"VERB\" )  ]"; //ok
+        String queryGroupOr = "[ ( word = \"dispersa\" | pos = \"VERB\" ) | lemma = \"disperdere\" ]"; //ok
+        String queryGroupGroup  = "[ ( word = \"dispersa\" | pos = \"VERB\" | lemma = \"disperdere\" ) ]"; //ok
+        String queryGroupGroup1 = "[ ( word = \"dispersa\" & pos = \"VERB\" | lemma = \"disperdere\" ) ]"; //ok
+        String queryMaxWithAnd="[ ( word = \"dispersa\" | pos = \"VERB\" ) & ( lemma = \"disperdere\" | word = \"antani\" ) ]"; //ok
+        String queryMaxWithOr="[ ( word = \"dispersa\" | pos = \"VERB\" ) | ( lemma = \"disperdere\" | word = \"antani\" ) ]"; //ok
+        String queryTestAnd ="[ ( word = \"dispersa\" | pos = \"VERB\" ) & ( lemma = \"disperdere\" | pos = \"VERB\" ) ]"; //ok
+        String queryTestOr ="[ ( word = \"dispersa\" | pos = \"VERB\" ) | ( lemma = \"disperdere\" | pos = \"VERB\" ) ]"; //ok
+        String queryTest ="[ ( word = \"dispersa\" | pos = \"VERB\" | lemma = \"ABBA\" ) & ( lemma = \"disperdere\" | pos = \"VERB\" ) ]"; //ok
+        String queryMaxSeq ="[ ( word = \"dispersa\" | pos = \"VERB\" | lemma = \"ABBA\" ) & ( lemma = \"disperdere\" | pos = \"VERB\" ) ] [ ( word = \"accusai\" | pos = \"ADJ\" ) & lemma = \"accusare\" ]";
+//String query = " [ (word = \"dispersa\" | lemma = \"disperdere\" | pos = \"VERB\" )]";//[ word = 'Basilicata' & pos = 'PROPN' ]";
         //query = "[ word = \"dispersa\" ] [ pos = \"ADJ\" ]";
         //query ="[ lemma = '.*disperdere.*']";
         final String res = "[word = 'Basilicata' & pos = '(PROPN|NP00000|NP00G00|NP00O00|NP00SP0|NP00V00)']";
-        params.put("query", queryOrAnd);
+        params.put("query", queryGroupAnd);
         Properties prop = kese.getKeseProp();
         CorporaInfo ci = CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/riccardo,hdl:20.500.11752/parole");
-        System.out.println("STICATEST se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.ilc4ClarinTestConvertQuery() " + ci.getCorpora());
+        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.ilc4ClarinTestConvertQuery() " + ci.getCorpora());
         //params.put("query", "[text = 'användning']");
 
-        final String cqpQuery = Ilc4ClarinFCSToCQPConverter.makeCQPFromFCS((new FCSQueryParser()).parseQuery(SRUVersion.VERSION_2_0, params, diagnostics), ci, prop);
+        final String cqpQuery = Ilc4ClarinFCSToCQPConverter.makeIlc4ClarinCQPFromFCS((new FCSQueryParser()).parseQuery(SRUVersion.VERSION_2_0, params, diagnostics), ci, prop);
         Query queryRes = kese.makeIlc4ClarinQuery(prop, cqpQuery, ci, 1, 250);
         System.out.println(cqpQuery);
 
