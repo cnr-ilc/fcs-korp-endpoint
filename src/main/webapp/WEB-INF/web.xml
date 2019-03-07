@@ -41,7 +41,7 @@
     </init-param>
     <init-param>
       <param-name>eu.clarin.sru.server.utils.sruServerSearchEngineClass</param-name>
-      <param-value>se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine</param-value>
+      <param-value>se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.Ilc4ClarinKorpEndpointSearchEngine</param-value>
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>

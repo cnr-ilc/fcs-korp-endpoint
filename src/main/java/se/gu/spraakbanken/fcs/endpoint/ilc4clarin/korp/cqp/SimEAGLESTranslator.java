@@ -1,9 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Added to the Forked from https://github.com/clarin-eric/fcs-korp-endpoint
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ *  GNU General Public License v3
  */
-package se.gu.spraakbanken.fcs.endpoint.korp.cqp;
+package se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.cqp;
 
 import eu.clarin.sru.server.SRUConstants;
 import eu.clarin.sru.server.SRUException;
@@ -14,12 +14,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class is a simplified map between UD and EAGLES tagsets There is no
- * direct mapping for each EAGLES code to UD such as AQ0FS00 to ADJ. Instead a
- * more shallow mapping between the tagsets: Is EAGLES pos starts with A then UD
- * is ADJ and something similar
+ * This class is a simplified map between UD and EAGLES tagsets 
+ * <p>There is no direct mapping for each EAGLES code to UD such as AQ0FS00 to ADJ.</p>
+ * <p>Instead a more shallow mapping between the tagsets is provided: tf EAGLES pos starts with A then UD * is ADJ 
+ * and something similar for the other pos.</p>
+ * <p>For example when UD is VERB V.* is returned. This is useful for the search engine which executes a like search instead of an
+ * exact one.</p>
  *
- * @author Riccardo Del Gratta &lt;riccardo.delgratta@ilc.cnr.it&gt;
+ * @author Riccardo Del Gratta &lt;riccardo.delgratta@ilc.cnr.it|gmail.com&gt;
  */
 public class SimEAGLESTranslator extends POSTranslator {
 
@@ -27,11 +29,6 @@ public class SimEAGLESTranslator extends POSTranslator {
     private final Map<String, List<String>> TO_UD = createToUD();
 
     @Override
-    /*
-            Create a mapping from UD to SimEAGLES.
-            When needed a .* is added to the significant letters of EAGLES tagset. 
-            This is useful during the normal operations of search retrieve
-     */
     Map<String, List<String>> createToPos() {
         Map<String, List<String>> pos = new HashMap<String, List<String>>();
 

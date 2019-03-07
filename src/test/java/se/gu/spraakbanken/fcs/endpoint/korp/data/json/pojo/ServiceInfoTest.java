@@ -21,8 +21,8 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.ServiceInfo;
-import se.gu.spraakbanken.fcs.endpoint.korp.utils.ReadExternalPropFiles;
+import se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.data.json.pojo.info.ServiceInfo;
+import se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.utils.ReadExternalPropFiles;
 
 public class ServiceInfoTest {
 

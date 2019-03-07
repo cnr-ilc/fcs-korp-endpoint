@@ -1,5 +1,6 @@
 package se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo;
 
+import se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.data.json.pojo.info.CorporaInfo;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;

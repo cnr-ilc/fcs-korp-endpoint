@@ -1,9 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Added to the Forked from https://github.com/clarin-eric/fcs-korp-endpoint
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ *  GNU General Public License v3
  */
-package se.gu.spraakbanken.fcs.endpoint.korp.cqp;
+package se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.cqp;
 
 import eu.clarin.sru.server.SRUConstants;
 import eu.clarin.sru.server.SRUException;
@@ -30,12 +30,12 @@ public class UDTranslator extends POSTranslator {
         pos.put("ADJ", Arrays.asList("ADJ"));
         pos.put("VERB", Arrays.asList("VERB"));
         pos.put("AUX", Arrays.asList("AUX"));
-        pos.put("NUM", Arrays.asList("NUM")); // No RO?
-        pos.put("PRON", Arrays.asList("PRON")); // No PS, HS?
+        pos.put("NUM", Arrays.asList("NUM")); 
+        pos.put("PRON", Arrays.asList("PRON")); 
         pos.put("DET", Arrays.asList("DET"));
         pos.put("PART", Arrays.asList("PART"));
-        pos.put("ADV", Arrays.asList("ADV")); // No PL?
-        pos.put("ADP", Arrays.asList("ADP")); // No PL?
+        pos.put("ADV", Arrays.asList("ADV")); 
+        pos.put("ADP", Arrays.asList("ADP")); 
         pos.put("CCONJ", Arrays.asList("CCONJ"));
         pos.put("SCONJ", Arrays.asList("SCONJ"));
         pos.put("INTJ", Arrays.asList("INTJ"));
@@ -52,12 +52,12 @@ public class UDTranslator extends POSTranslator {
         ud.put("ADJ", Arrays.asList("ADJ"));
         ud.put("VERB", Arrays.asList("VERB"));
         ud.put("AUX", Arrays.asList("AUX"));
-        ud.put("NUM", Arrays.asList("NUM")); // No RO?
-        ud.put("PRON", Arrays.asList("PRON")); // No PS, HS?
+        ud.put("NUM", Arrays.asList("NUM")); 
+        ud.put("PRON", Arrays.asList("PRON")); 
         ud.put("DET", Arrays.asList("DET"));
         ud.put("PART", Arrays.asList("PART"));
-        ud.put("ADV", Arrays.asList("ADV")); // No PL?
-        ud.put("ADP", Arrays.asList("ADP")); // No PL?
+        ud.put("ADV", Arrays.asList("ADV")); 
+        ud.put("ADP", Arrays.asList("ADP")); 
         ud.put("CCONJ", Arrays.asList("CCONJ"));
         ud.put("SCONJ", Arrays.asList("SCONJ"));
         ud.put("INTJ", Arrays.asList("INTJ"));
