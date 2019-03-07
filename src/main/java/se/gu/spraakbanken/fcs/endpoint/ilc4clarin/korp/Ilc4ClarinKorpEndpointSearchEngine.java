@@ -1,9 +1,9 @@
 /**
- *
+ * Forked from https://github.com/clarin-eric/fcs-korp-endpoint
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  *  GNU General Public License v3
  */
-package se.gu.spraakbanken.fcs.endpoint.korp;
+package se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,6 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import eu.clarin.sru.server.CQLQueryParser;
 import eu.clarin.sru.server.SRUConfigException;
@@ -43,88 +42,120 @@ import eu.clarin.sru.server.fcs.ResourceInfo;
 import eu.clarin.sru.server.fcs.SimpleEndpointSearchEngineBase;
 import eu.clarin.sru.server.fcs.utils.SimpleEndpointDescriptionParser;
 
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import se.gu.spraakbanken.fcs.endpoint.korp.cqp.FCSToCQPConverter;
-import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo;
-import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.ServiceInfo;
+import eu.clarin.sru.server.SRUServer;
+import java.util.Properties;
 
 
+import se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.cqp.Ilc4ClarinFCSToCQPConverter;
+import se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.data.json.pojo.info.CorporaInfo;
+import se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.data.json.pojo.info.ServiceInfo;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.query.Query;
-
+import se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.utils.ManageProperties;
+import se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.utils.ReadExternalPropFiles;
 
 /**
- * A Korp CLARIN FCS 2.0 endpoint example search engine.
- *
+ * A Korp CLARIN FCS 2.0 IL4CLARIN endpoint.
+ * 
+ * In addition to KorpEndpointSearchEngine it adds an external property file
+ * which is used to make the EP configurable in terms of corpora to make available, different pos tagsets
+ * The propertyfile is passed to the servlet in the web.xml file
+ * 
+ * @author Riccardo Del Gratta &lt;riccardo.delgratta@ilc.cnr.it|gmail.com&gt;
  */
-public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
-    private static final String X_FCS_ENDPOINT_DESCRIPTION =
-            "x-fcs-endpoint-description";
-    private static final String ED_NS =
-            "http://clarin.eu/fcs/endpoint-description";
+public class Ilc4ClarinKorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
+    
+    private static final String X_FCS_ENDPOINT_DESCRIPTION
+            = "x-fcs-endpoint-description";
+    private static final String ED_NS
+            = "http://clarin.eu/fcs/endpoint-description";
     private static final String ED_PREFIX = "ed";
     private static final int ED_VERSION = 2;
     private static CorporaInfo openCorporaInfo;
-    private static final Logger LOG =
-            LoggerFactory.getLogger(KorpEndpointSearchEngine.class);
+    private static final Logger LOG
+            = LoggerFactory.getLogger(Ilc4ClarinKorpEndpointSearchEngine.class);
     protected EndpointDescription endpointDescription;
-    public static final String RESOURCE_INVENTORY_URL =
-            "se.gu.spraakbanken.fcs.korp.sru.resourceInventoryURL";
+    public static final String RESOURCE_INVENTORY_URL
+            = "se.gu.spraakbanken.fcs.korp.sru.resourceInventoryURL";
 
-    protected EndpointDescription createEndpointDescription (
+    private Properties keseProp = new Properties();
+
+    protected EndpointDescription createEndpointDescription(
             ServletContext context, SRUServerConfig config,
             Map<String, String> params) throws SRUConfigException {
-	try {
-	    URL url = null;
-	    String riu = params.get(RESOURCE_INVENTORY_URL);
+        try {
+            URL url = null;
+            String riu = params.get(RESOURCE_INVENTORY_URL);
             if ((riu == null) || riu.isEmpty()) {
-                url = context.getResource("/WEB-INF/endpoint-description.xml");
+                url = context.getResource("/WEB-INF/ilc4clarin-korp-endpoint-description.xml");
                 LOG.debug("using bundled 'endpoint-description.xml' file");
             } else {
                 url = new File(riu).toURI().toURL();
                 LOG.debug("using external file '{}'", riu);
             }
 
-	    return SimpleEndpointDescriptionParser.parse(url);
-	} catch (MalformedURLException mue) {
-	    throw new SRUConfigException("Malformed URL for initializing resource info inventory", mue);
-	}
+            return SimpleEndpointDescriptionParser.parse(url);
+        } catch (MalformedURLException mue) {
+            throw new SRUConfigException("Malformed URL for initializing resource info inventory", mue);
+        }
     }
 
     /**
      * Initialize the search engine. This initialization should be tailored
      * towards your environment and needs.
      *
-     * @param context
-     *            the {@link ServletContext} for the Servlet
-     * @param config
-     *            the {@link SRUServerConfig} object for this search engine
-     * @param queryParserBuilder
-     *            the {@link SRUQueryParserRegistry.Builder} object to be used
-     *            for this search engine. Use to register additional query
-     *            parsers with the SRUServer
-     * @param params
-     *            additional parameters gathered from the Servlet configuration
-     *            and Servlet context.
-     * @throws SRUConfigException
-     *             if an error occurred
+     * @param context the {@link ServletContext} for the Servlet
+     * @param config the {@link SRUServerConfig} object for this search engine
+     * @param queryParserBuilder the {@link SRUQueryParserRegistry.Builder}
+     * object to be used for this search engine. Use to register additional
+     * query parsers with the {@link SRUServer}.
+     * @param params additional parameters gathered from the Servlet
+     * configuration and Servlet context.
+     * @throws SRUConfigException if an error occurred
      */
     protected void doInit(ServletContext context,
             SRUServerConfig config,
             SRUQueryParserRegistry.Builder queryParserBuilder,
             Map<String, String> params) throws SRUConfigException {
-	doInit(config, queryParserBuilder, params);
+
+        doInit(config, queryParserBuilder, params);
     }
 
+    /**
+     * This functions returns the non protected corpora provided by this end
+     * point. They should meet what is reported in the endpoint description
+     *
+     * @param config the {@link SRUServerConfig} object for this search engine
+     * @param queryParserBuilder the {@link SRUQueryParserRegistry.Builder}
+     * object to be used for this search engine. Use to register additional
+     * query parsers with the {@link SRUServer}.
+     * @param params  additional parameters gathered from the Servlet
+     * configuration and Servlet context.
+     * @throws SRUConfigException if an error occurred
+     */
     protected void doInit(SRUServerConfig config,
             SRUQueryParserRegistry.Builder queryParserBuilder,
             Map<String, String> params) throws SRUConfigException {
-	LOG.info("KorpEndpointSearchEngine::doInit {}", config.getPort());
-	List<String> openCorpora = ServiceInfo.getModernCorpora();
-	openCorporaInfo = CorporaInfo.getCorporaInfo(openCorpora);
+        Properties prop = new Properties();
+        LOG.info("KorpEndpointSearchEngine::doInit {}", config.getPort());
+        LOG.debug("Config Parameters" + " " + params);
+        
+       
+        try {
+            //Properties prop = ReadExternalPropFiles.getPropertyFile(System.getProperty("user.dir") + "/target/test-classes/se/gu/spraakbanken/fcs/endpoint/korp/config-test.properties");
+            prop = ReadExternalPropFiles.getPropertyFile(params.get("eu.clarin.sru.server.propertyFile"));
+            prop.setProperty("transport", params.get("eu.clarin.sru.server.transport"));
+        } catch (Exception e) {
+            throw new SRUConfigException(e.getMessage());
+            //e.printStackTrace();
+        }
+        setKeseProp(prop);
+        List<String> openCorpora = ServiceInfo.getIlc4ClarinCorpora(prop);
+        System.err.println("KorpEndpointSearchEngine::doInit openCorpora "+openCorpora);
+        openCorporaInfo = CorporaInfo.getIlc4ClarinCorporaInfo(prop, openCorpora);
+       
     }
 
     /**
@@ -139,24 +170,20 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
      * Handle a <em>scan</em> operation. The default implementation is a no-op.
      * Override this method, if you want to provide a custom behavior.
      *
-     * @param config
-     *            the <code>SRUEndpointConfig</code> object that contains the
-     *            endpoint configuration
-     * @param request
-     *            the <code>SRURequest</code> object that contains the request
-     *            made to the endpoint
-     * @param diagnostics
-     *            the <code>SRUDiagnosticList</code> object for storing
-     *            non-fatal diagnostics
+     * @param config the <code>SRUEndpointConfig</code> object that contains the
+     * endpoint configuration
+     * @param request the <code>SRURequest</code> object that contains the
+     * request made to the endpoint
+     * @param diagnostics the <code>SRUDiagnosticList</code> object for storing
+     * non-fatal diagnostics
      * @return a <code>SRUScanResultSet</code> object or <code>null</code> if
-     *         this operation is not supported by this search engine
-     * @throws SRUException
-     *             if an fatal error occurred
+     * this operation is not supported by this search engine
+     * @throws SRUException if an fatal error occurred
      */
     @Override
     protected SRUScanResultSet doScan(SRUServerConfig config,
-             SRURequest request, SRUDiagnosticList diagnostics)
-             throws SRUException {
+            SRURequest request, SRUDiagnosticList diagnostics)
+            throws SRUException {
         // final CQLNode scanClause = request.getScanClause();
         // if (scanClause instanceof CQLTermNode) {
         //     final CQLTermNode root = (CQLTermNode) scanClause;
@@ -167,20 +194,19 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
         //     throw new SRUException(SRUConstants.SRU_QUERY_FEATURE_UNSUPPORTED,
         //             "Scan clause too complex.");
         //}
-	return null;
+        return null;
     }
 
     /**
-     * Convenience method for parsing a string to boolean. Values <code>1</code>,
-     * <code>true</code>, <code>yes</code> yield a <em>true</em> boolean value
-     * as a result, all others (including <code>null</code>) a <em>false</em>
+     * Convenience method for parsing a string to boolean. Values
+     * <code>1</code>, <code>true</code>, <code>yes</code> yield a <em>true</em>
+     * boolean value as a result, all others (including <code>null</code>) a
+     * <em>false</em>
      * boolean value.
      *
-     * @param value
-     *            the string to parse
+     * @param value the string to parse
      * @return <code>true</code> if the supplied string was considered something
-     *         representing a <em>true</em> boolean value, <code>false</code>
-     *         otherwise
+     * representing a <em>true</em> boolean value, <code>false</code> otherwise
      */
     protected static boolean parseBoolean(String value) {
         if (value != null) {
@@ -212,16 +238,16 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
             writer.writeAttribute("id", dataView.getIdentifier());
             String s;
             switch (dataView.getDeliveryPolicy()) {
-            case SEND_BY_DEFAULT:
-                s = "send-by-default";
-                break;
-            case NEED_TO_REQUEST:
-                s = "need-to-request";
-                break;
-            default:
-                throw new XMLStreamException(
-                        "invalid value for payload delivery policy: " +
-                                dataView.getDeliveryPolicy());
+                case SEND_BY_DEFAULT:
+                    s = "send-by-default";
+                    break;
+                case NEED_TO_REQUEST:
+                    s = "need-to-request";
+                    break;
+                default:
+                    throw new XMLStreamException(
+                            "invalid value for payload delivery policy: "
+                            + dataView.getDeliveryPolicy());
             } // switch
             writer.writeAttribute("delivery-policy", s);
             writer.writeCharacters(dataView.getMimeType());
@@ -261,8 +287,8 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
 
         // Resources
         try {
-            List<ResourceInfo> resources =
-                    endpointDescription.getResourceList(
+            List<ResourceInfo> resources
+                    = endpointDescription.getResourceList(
                             EndpointDescription.PID_ROOT);
             writeResourceInfos(writer, resources);
         } catch (SRUException e) {
@@ -271,7 +297,6 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
         }
         writer.writeEndElement(); // "EndpointDescription" element
     }
-
 
     private void writeResourceInfos(XMLStreamWriter writer,
             List<ResourceInfo> resources) throws XMLStreamException {
@@ -363,80 +388,135 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
         }
     }
 
+   
+    /**
+     * Handle a <em>searchRetrieve</em> operation. 
+     * Briefly it does:
+     * <ul>
+     * <li>Fix the context from URL: if some corpora are sent from the aggregator, only those are searched</li>
+     * <li>Fix the context from URL: if some corpora are sent from the aggregator, only those are searched</li>
+     * </ul>
+     * @param config the <code>SRUEndpointConfig</code> object that contains the
+     * endpoint configuration
+     * @param request the <code>SRURequest</code> object that contains the
+     * request made to the endpoint
+     * @param diagnostics the <code>SRUDiagnosticList</code> object for storing
+     * non-fatal diagnostics
+     * @return a <code>SRUScanResultSet</code> object or <code>null</code> if
+     * this operation is not supported by this search engine
+     * @throws SRUException if an fatal error occurred
+     */
     public SRUSearchResultSet search(SRUServerConfig config,
             SRURequest request, SRUDiagnosticList diagnostics)
-	throws SRUException {
-	String query;
-	if (request.isQueryType(Constants.FCS_QUERY_TYPE_CQL)) {
+            throws SRUException {
+        CorporaInfo contextedCorpora = new CorporaInfo();
+        String query;
+        boolean hasFcsContextCorpus = false;
+        String fcsContextCorpus = "";
+        for (String erd : request.getExtraRequestDataNames()) {
+            if ("x-fcs-context".equals(erd)) {
+                hasFcsContextCorpus = true;
+                fcsContextCorpus = request.getExtraRequestData("x-fcs-context");
+                LOG.debug("se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() with context '{}'", fcsContextCorpus);
+                break;
+            }
+        }
+        
+        // fix context
+        if (hasFcsContextCorpus && !"".equals(fcsContextCorpus)) {
+
+            //  if (!"hdl%3A20%2E500%2E11752%2Fcorpora".equals(fcsContextCorpus)) {
+            if (!getKeseProp().getProperty("DEFCONTEXT").equals(fcsContextCorpus)) {
+                LOG.info("Loading specific corpus data: '{}'", fcsContextCorpus);
+
+                contextedCorpora = CorporaInfo.selectedCorporaInfo(keseProp, fcsContextCorpus);
+
+            } else {
+                contextedCorpora = openCorporaInfo;
+                LOG.info("No context specified: '{}'", fcsContextCorpus);
+
+            }
+            // hdl%3A10794%2Fsbmoderna is the default
+        } else {
+            LOG.info("No context specified: '{}'", fcsContextCorpus);
+
+            contextedCorpora = openCorporaInfo;
+        }
+        
+        
+        if (request.isQueryType(Constants.FCS_QUERY_TYPE_CQL)) {
             /*
              * Got a CQL query (either SRU 1.1 or higher).
              * Translate to a proper CQP query ...
              */
-            final CQLQueryParser.CQLQuery q =
-		request.getQuery(CQLQueryParser.CQLQuery.class);
-            query = FCSToCQPConverter.makeCQPFromCQL(q);
+            final CQLQueryParser.CQLQuery q
+                    = request.getQuery(CQLQueryParser.CQLQuery.class);
+            
+            query = Ilc4ClarinFCSToCQPConverter.makeCQPFromCQL(q);
         } else if (request.isQueryType(Constants.FCS_QUERY_TYPE_FCS)) {
             /*
              * Got a FCS query (SRU 2.0).
              * Translate to a proper CQP query
              */
-            final FCSQueryParser.FCSQuery q =
-		request.getQuery(FCSQueryParser.FCSQuery.class);
-            query = FCSToCQPConverter.makeCQPFromFCS(q);
+            final FCSQueryParser.FCSQuery q
+                    = request.getQuery(FCSQueryParser.FCSQuery.class);
+            query = Ilc4ClarinFCSToCQPConverter.Ilc4ClarinMakeCQPFromFCS(q, contextedCorpora, getKeseProp());
         } else {
             /*
              * Got something else we don't support. Send error ...
              */
             throw new SRUException(
-				   SRUConstants.SRU_CANNOT_PROCESS_QUERY_REASON_UNKNOWN,
-				   "Queries with queryType '" +
-				   request.getQueryType() +
-				   "' are not supported by this CLARIN-FCS Endpoint.");
+                    SRUConstants.SRU_CANNOT_PROCESS_QUERY_REASON_UNKNOWN,
+                    "Queries with queryType '"
+                    + request.getQueryType()
+                    + "' are not supported by this CLARIN-FCS Endpoint.");
         }
+        
+        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() '{}'",query);
 
-	    boolean hasFcsContextCorpus = false;
-	    String fcsContextCorpus = "";
-	    for (String erd : request.getExtraRequestDataNames()) {
-		if ("x-fcs-context".equals(erd)) {
-		    hasFcsContextCorpus = true;
-		    fcsContextCorpus = request.getExtraRequestData("x-fcs-context");
-		    break;
-		}
-	    }
-	    if (hasFcsContextCorpus && !"".equals(fcsContextCorpus)) {
-		if (!"hdl%3A10794%2Fsbmoderna".equals(fcsContextCorpus)) {
-		    LOG.info("Loading specific corpus data: '{}'", fcsContextCorpus);
-		    //getCorporaInfo();
-		}
-		// hdl%3A10794%2Fsbmoderna is the default
-	    }
-
-
-	Query queryRes = makeQuery(query, openCorporaInfo, request.getStartRecord(), request.getMaximumRecords());
-	if (queryRes == null) {
-	                throw new SRUException(
-				   SRUConstants.SRU_CANNOT_PROCESS_QUERY_REASON_UNKNOWN,
-				   "The query execution failed by this CLARIN-FCS Endpoint.");
-	}
-	return new KorpSRUSearchResultSet(config, request, diagnostics, queryRes, query, openCorporaInfo);
+        Query queryRes = makeIlc4ClarinQuery(getKeseProp(), query, contextedCorpora, request.getStartRecord(), request.getMaximumRecords());
+        if (queryRes == null) {
+            throw new SRUException(
+                    SRUConstants.SRU_CANNOT_PROCESS_QUERY_REASON_UNKNOWN,
+                    "The query execution failed by this CLARIN-FCS Endpoint.");
+        }
+        Ilc4ClarinKorpSRUSearchResultSet kssrs = new Ilc4ClarinKorpSRUSearchResultSet(config, request, diagnostics, queryRes, query, contextedCorpora); //openCorporaInfo);
+        kssrs.setKssrsProp(keseProp);
+        
+        return kssrs; //new Ilc4ClarinKorpSRUSearchResultSet(config, request, diagnostics, queryRes, query, openCorporaInfo);
     }
 
-    protected Query makeQuery(final String cqpQuery, CorporaInfo openCorporaInfo, final int startRecord, final int maximumRecords) {
-	ObjectMapper mapper = new ObjectMapper();
-	String wsString ="https://spraakbanken.gu.se/ws/korp/v6/?";
-	String queryString = "command=query&defaultcontext=1+sentence&show=msd,lemma&cqp=";
-	String startParam = "&start=" + (startRecord == 1 ? 0 : startRecord - 1);
-	String endParam = "&end=" + (maximumRecords == 0 ? 250 : startRecord - 1 + maximumRecords - 1);
-	String corpusParam = "&corpus=";
-	    //"SUC2";
-	String corpusParamValues = CorporaInfo.getCorpusParameterValues(openCorporaInfo.getCorpora().keySet());
+    
+    /**
+     * Executes the query on the Backend Search Engine 
+     * @param prop the Property File
+     * @param cqpQuery The query in CQP
+     * @param openCorporaInfo The corpora on which a searchRetieve operation is performed
+     * @param startRecord 
+     * @param maximumRecords
+     * @return a {@link Query}
+     */
+    protected Query makeIlc4ClarinQuery(Properties prop, final String cqpQuery, CorporaInfo openCorporaInfo, final int startRecord, final int maximumRecords) {
+        ObjectMapper mapper = new ObjectMapper();
+        //System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() " + cqpQuery);
+        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() '{}'", cqpQuery);
+        
+        String wsString = ManageProperties.createKorpUrl(prop);//"https://spraakbanken.gu.se/ws/korp/v6/?";
+        String queryString = "query?defaultcontext=1+sentence&show=msd,lemma,pos&cqp=";
+        String startParam = "&start=" + (startRecord == 1 ? 0 : startRecord - 1);
+        String endParam = "&end=" + (maximumRecords == 0 ? 250 : startRecord - 1 + maximumRecords - 1);
+        String corpusParam = "&corpus=";
+        //"SUC2";
+        String corpusParamValues = CorporaInfo.getCorpusParameterValues(openCorporaInfo.getCorpora().keySet());
         try {
-	    URL korp = new URL(wsString + queryString + URLEncoder.encode(cqpQuery, "UTF-8") + startParam + endParam + corpusParam + corpusParamValues);
-	    // mapper.reader(Query.class).readValue(korp.openStream());
-	    // truncates the query string 
-	    // using URLConnection.getInputStream() instead. /ljo
-	    URLConnection connection = korp.openConnection();
-	    return mapper.reader(Query.class).readValue(connection.getInputStream());
+            System.out.println(" se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() " + wsString + queryString + URLEncoder.encode(cqpQuery, "UTF-8") + startParam + endParam + corpusParam + corpusParamValues);
+            URL korp = new URL(wsString + queryString + URLEncoder.encode(cqpQuery, "UTF-8") + startParam + endParam + corpusParam + corpusParamValues);
+            // mapper.reader(Query.class).readValue(korp.openStream());
+            // truncates the query string 
+            // using URLConnection.getInputStream() instead. /ljo
+            URLConnection connection = korp.openConnection();
+
+            return mapper.readerFor(Query.class).readValue(connection.getInputStream());
         } catch (JsonParseException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -450,11 +530,25 @@ public class KorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-	return null;
+        return null;
     }
 
     protected CorporaInfo getCorporaInfo() {
-	return openCorporaInfo;
+        return openCorporaInfo;
+    }
+    
+    /**
+     * @return the keseProp
+     */
+    public Properties getKeseProp() {
+        return keseProp;
+    }
+
+    /**
+     * @param keseProp the keseProp to set
+     */
+    public void setKeseProp(Properties keseProp) {
+        this.keseProp = keseProp;
     }
 
 }

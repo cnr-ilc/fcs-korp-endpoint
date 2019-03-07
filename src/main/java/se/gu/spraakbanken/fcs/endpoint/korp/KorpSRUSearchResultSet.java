@@ -23,28 +23,17 @@ import eu.clarin.sru.server.SRUServerConfig;
 import eu.clarin.sru.server.fcs.AdvancedDataViewWriter;
 import eu.clarin.sru.server.fcs.Constants;
 import eu.clarin.sru.server.fcs.XMLStreamWriterHelper;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.logging.Level;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import se.gu.spraakbanken.fcs.endpoint.korp.cqp.POSTranslator;
-import se.gu.spraakbanken.fcs.endpoint.korp.cqp.POSTranslatorFactory;
 
 import se.gu.spraakbanken.fcs.endpoint.korp.cqp.SUCTranslator;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo;
-import static se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getIlc4ClarinCorporaInfo;
-import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.Corpus;
+
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.query.Kwic;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.query.Match;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.query.Query;
 import se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.query.Token;
-import se.gu.spraakbanken.fcs.endpoint.korp.utils.Utilities;
 
 /**
  * A result set of a <em>searchRetrieve</em> operation. It it used to iterate
@@ -63,23 +52,9 @@ import se.gu.spraakbanken.fcs.endpoint.korp.utils.Utilities;
  * </p>
  *
  * @see <a href="http://www.loc.gov/standards/sru/specs/search-retrieve.html">
- * SRU Search Retrieve Operation</a>
+ *      SRU Search Retrieve Operation</a>
  */
 public class KorpSRUSearchResultSet extends SRUSearchResultSet {
-
-    /**
-     * @return the kssrsProp
-     */
-    public Properties getKssrsProp() {
-        return kssrsProp;
-    }
-
-    /**
-     * @param kssrsProp the kssrsProp to set
-     */
-    public void setKssrsProp(Properties kssrsProp) {
-        this.kssrsProp = kssrsProp;
-    }
 
     SRUServerConfig serverConfig = null;
     SRURequest request = null;
@@ -96,50 +71,49 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
     private int maximumRecords = 1000;
     private int recordCount; //startRecord + currentPageMaxRecords
     // XMLStreamWriterHelper.FCS_NS private!
-
-    private Properties kssrsProp = new Properties();
     public static final String CLARIN_FCS_RECORD_SCHEMA = "http://clarin.eu/fcs/resource";
     private static Logger LOG = LoggerFactory.getLogger(KorpSRUSearchResultSet.class);
 
     /**
      * Constructor.
      *
-     * @param serverConfig the {@link SRUServerConfig} from the aggregator.
-     * @param request the SRU/CQL request {@link SRURequest} from the
-     * aggregator.
-     * @param diagnostics the SRUDiagnosticList {@link SRUDiagnosticList} from
-     * the aggregator.
-     * @param resultSet The Query instance with the resultSet.
-     * @param query The original query.
-     * @param corporaInfo The coproraInfo instance with the features and
-     * capabilities of each corpus.
+     * @param serverConfig 
+     *            the {@link SRUServerConfig} from the aggregator.
+     * @param request 
+     *            the SRU/CQL request {@link SRURequest} from the aggregator.
+     * @param diagnostics
+     *            the SRUDiagnosticList {@link SRUDiagnosticList} from the aggregator.
+     * @param resultSet 
+     * The Query instance with the resultSet. 
+     * @param query 
+     * The original query. 
+     * @param corporaInfo 
+     * The coproraInfo instance with the features and capabilities of each corpus. 
      *
      */
     protected KorpSRUSearchResultSet(SRUServerConfig serverConfig, SRURequest request, SRUDiagnosticList diagnostics, final Query resultSet, final String query, final CorporaInfo corporaInfo) {
         super(diagnostics);
-        this.serverConfig = serverConfig;
-        this.request = request;
-        this.resultSet = resultSet;
-        this.query = query;
-        this.corporaInfo = corporaInfo;
-
-        startRecord = (request.getStartRecord() < 1) ? 1 : request.getStartRecord();
-        currentRecordCursor = startRecord - 1;
-        maximumRecords = startRecord - 1 + request.getMaximumRecords();
-        recordCount = request.getMaximumRecords();
-
+	this.serverConfig = serverConfig;
+	this.request = request;
+	this.resultSet = resultSet;
+	this.query = query;
+	this.corporaInfo = corporaInfo;
+	
+	startRecord = (request.getStartRecord() < 1) ? 1 : request.getStartRecord();
+	currentRecordCursor = startRecord - 1;
+	maximumRecords = startRecord - 1 + request.getMaximumRecords();
+	recordCount = request.getMaximumRecords();
     }
 
     protected KorpSRUSearchResultSet(SRUServerConfig serverConfig, SRUDiagnosticList diagnostics, final Query resultSet, final String query, final CorporaInfo corporaInfo) {
         super(diagnostics);
-        this.serverConfig = serverConfig;
-        this.resultSet = resultSet;
-        this.query = query;
-        this.corporaInfo = corporaInfo;
-        this.maximumRecords = 250;
-        this.currentRecordCursor = startRecord - 1;
-        this.recordCount = 250;
-
+	this.serverConfig = serverConfig;
+	this.resultSet = resultSet;
+	this.query = query;
+	this.corporaInfo = corporaInfo;
+	this.maximumRecords = 250;
+	this.currentRecordCursor = startRecord - 1;
+	this.recordCount = 250;
     }
 
     /**
@@ -148,13 +122,13 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
      * by a query, it must return -1.
      *
      * @return the total number of results or 0 if the query failed or -1 if the
-     * search engine cannot determine the total number of results
+     *         search engine cannot determine the total number of results
      */
     public int getTotalRecordCount() {
-        if (resultSet != null) {
-            return resultSet.getHits();
-        }
-        return -1;
+	if (resultSet != null) {
+	    return resultSet.getHits();
+	}
+	return -1;
     }
 
     /**
@@ -165,10 +139,10 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
      * @return the number of results or 0 if the query failed
      */
     public int getRecordCount() {
-        if (resultSet != null && resultSet.getHits() > -1) {
-            return resultSet.getHits() < maximumRecords ? resultSet.getHits() : maximumRecords;
-        }
-        return 0;
+	if (resultSet != null && resultSet.getHits() > -1) {
+	    return resultSet.getHits() < maximumRecords ? resultSet.getHits() : maximumRecords;
+	}
+	return 0;
     }
 
     /**
@@ -176,7 +150,7 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
      * <code>null</code>.
      *
      * @return the result set id or <code>null</code> if not applicable for this
-     * result
+     *         result
      */
     public String getResultSetId() {
         return resultSetId;
@@ -185,11 +159,11 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
     /**
      * The result set time to live. In SRU 2.0 it will be serialized as
      * <code>&lt;resultSetTTL&gt;</code> element; in SRU 1.2 as
-     * <code>&lt;resultSetIdleTime&gt;</code> element. The default
-     * implementation returns <code>-1</code>.
+     * <code>&lt;resultSetIdleTime&gt;</code> element. The default implementation
+     * returns <code>-1</code>.
      *
-     * @return the result set time to live or <code>-1</code> if not applicable
-     * for this result
+     * @return the result set time to live or <code>-1</code> if not applicable for
+     *         this result
      */
     public int getResultSetTTL() {
         return -1;
@@ -202,7 +176,7 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
      *
      * @see SRUResultCountPrecision
      * @return the result count precision or <code>null</code> if not applicable
-     * for this result
+     *         for this result
      */
     public SRUResultCountPrecision getResultCountPrecision() {
         return SRUResultCountPrecision.EXACT;
@@ -215,7 +189,7 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
      * @return the record schema identifier
      */
     public String getRecordSchemaIdentifier() {
-        return request.getRecordSchemaIdentifier() != null ? request.getRecordSchemaIdentifier() : CLARIN_FCS_RECORD_SCHEMA;
+	return request.getRecordSchemaIdentifier() != null ? request.getRecordSchemaIdentifier() : CLARIN_FCS_RECORD_SCHEMA;
     }
 
     /**
@@ -230,19 +204,21 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
      * </p>
      *
      * @return <code>true</code> if the new current record is valid;
-     * <code>false</code> if there are no more records
-     * @throws SRUException if an error occurred while fetching the next record
+     *         <code>false</code> if there are no more records
+     * @throws SRUException
+     *             if an error occurred while fetching the next record
      */
     public boolean nextRecord() throws SRUException {
-        if (currentRecordCursor < Math.min(resultSet.getHits(), maximumRecords)) {
-            currentRecordCursor++;
-            return true;
-        }
-        return false;
+	if (currentRecordCursor < Math.min(resultSet.getHits(), maximumRecords)) {
+	    currentRecordCursor++;
+	    return true;
+	}
+	return false;
     }
 
+
     protected int getCurrentRecordCursor() {
-        return currentRecordCursor;
+	return currentRecordCursor;
 
     }
 
@@ -251,11 +227,12 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
      * retrieved in a subsequent operation.
      *
      * @return identifier for the record or <code>null</code> if none is
-     * available
-     * @throws NoSuchElementException result set is past all records
+     *         available
+     * @throws NoSuchElementException
+     *             result set is past all records
      */
     public String getRecordIdentifier() {
-        return null;
+	return null;
     }
 
     /**
@@ -266,13 +243,13 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
      * @return a surrogate diagnostic or <code>null</code>
      */
     public SRUDiagnostic getSurrogateDiagnostic() {
-        if ((getRecordSchemaIdentifier() != null)
-                && !CLARIN_FCS_RECORD_SCHEMA.equals(getRecordSchemaIdentifier())) {
+	if ((getRecordSchemaIdentifier() != null) &&
+                !CLARIN_FCS_RECORD_SCHEMA.equals(getRecordSchemaIdentifier())) {
             return new SRUDiagnostic(
                     SRUConstants.SRU_RECORD_NOT_AVAILABLE_IN_THIS_SCHEMA,
                     getRecordSchemaIdentifier(),
-                    "Record is not available in record schema \""
-                    + getRecordSchemaIdentifier() + "\".");
+                    "Record is not available in record schema \"" +
+                            getRecordSchemaIdentifier() + "\".");
         }
 
         return null;
@@ -281,199 +258,68 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
     /**
      * Serialize the current record in the requested format.
      *
-     * @param writer the {@link XMLStreamException} instance to be used
-     * @throws XMLStreamException an error occurred while serializing the result
-     * @throws NoSuchElementException result set past all records
-     * @see #getRecordSchemaIdentifier()
-     */
-//    @Override
-//    public void writeRecord(XMLStreamWriter writer)
-//            throws XMLStreamException {
-//        //
-//        AdvancedDataViewWriter helper
-//                = new AdvancedDataViewWriter(AdvancedDataViewWriter.Unit.ITEM);
-////        URI wordLayerId = URI.create("http://spraakbanken.gu.se/ns/fcs/layer/word");
-////        URI lemmaLayerId = URI.create("http://spraakbanken.gu.se/ns/fcs/layer/lemma");
-////        URI posLayerId = URI.create("http://spraakbanken.gu.se/ns/fcs/layer/pos");
-//
-//        URI wordLayerId = URI.create("http://ilc4clarin.ilc.cnr.it/services/fcs/layer/word");
-//        URI lemmaLayerId = URI.create("http://ilc4clarin.ilc.cnr.it/services/fcs/layer/lemma");
-//        URI posLayerId = URI.create("http://ilc4clarin.ilc.cnr.it/services/fcs/layer/pos");
-//
-//        Kwic kwic = resultSet.getKwic().get(currentRecordCursor - startRecord);
-//        List<Token> tokens = kwic.getTokens();
-//        Match match = kwic.getMatch();
-//        String corpus = kwic.getCorpus();
-//
-//
-//        XMLStreamWriterHelper.writeStartResource(writer, corpus + "-" + match.getPosition(), null);
-//        XMLStreamWriterHelper.writeStartResourceFragment(writer, null, null);
-//        long start = 1;
-//        if (match.getStart() != 1) {
-//            for (int i = 0; i < match.getStart(); i++) {
-//                long end = start + tokens.get(i).getWord().length();
-//                helper.addSpan(wordLayerId, start, end, tokens.get(i).getWord());
-//                try {
-//                    helper.addSpan(posLayerId, start, end, SUCTranslator.fromSUC(tokens.get(i).getMsd()).get(0));
-//                } catch (SRUException se) {
-//                    se.printStackTrace();
-//                }
-//                try{
-//                //helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma());
-//                start = end + 1;
-//                }
-//                catch (Exception se) {
-//                    se.printStackTrace();
-//                }
-//                
-//            }
-//        } else {
-//            System.out.println( DUNNO se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() " + corpus);
-//        }
-//
-//        for (int i = match.getStart(); i < match.getEnd(); i++) {
-//            long end = start + tokens.get(i).getWord().length();
-//            helper.addSpan(wordLayerId, start, end, tokens.get(i).getWord(), 1);
-//            try {
-//                helper.addSpan(posLayerId, start, end, SUCTranslator.fromSUC(tokens.get(i).getMsd()).get(0), 1);
-//            } catch (SRUException se) {
-//            }
-//            helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma(), 1);
-//            start = end + 1;
-//        }
-//
-//        if (tokens.size() > match.getEnd()) {
-//            for (int i = match.getEnd(); i < tokens.size(); i++) {
-//                long end = start + tokens.get(i).getWord().length();
-//                helper.addSpan(wordLayerId, start, end, tokens.get(i).getWord());
-//                try {
-//                    helper.addSpan(posLayerId, start, end, SUCTranslator.fromSUC(tokens.get(i).getMsd()).get(0));
-//                } catch (SRUException se) {
-//                }
-//                helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma());
-//                start = end + 1;
-//            }
-//        }
-//
-//        helper.writeHitsDataView(writer, wordLayerId);
-//        if (request == null || request.isQueryType(Constants.FCS_QUERY_TYPE_FCS)) {
-//            helper.writeAdvancedDataView(writer);
-//        }
-//
-//        XMLStreamWriterHelper.writeEndResourceFragment(writer);
-//        XMLStreamWriterHelper.writeEndResource(writer);
-//       
-//
-//    }
-    /**
-     * Serialize the current record in the requested format.
-     *
-     * @param writer the {@link XMLStreamException} instance to be used
-     * @throws XMLStreamException an error occurred while serializing the result
-     * @throws NoSuchElementException result set past all records
+     * @param writer
+     *            the {@link XMLStreamException} instance to be used
+     * @throws XMLStreamException
+     *             an error occurred while serializing the result
+     * @throws NoSuchElementException
+     *             result set past all records
      * @see #getRecordSchemaIdentifier()
      */
     @Override
     public void writeRecord(XMLStreamWriter writer)
             throws XMLStreamException {
-        //
-        AdvancedDataViewWriter helper
-                = new AdvancedDataViewWriter(AdvancedDataViewWriter.Unit.ITEM);
-//        URI wordLayerId = URI.create("http://spraakbanken.gu.se/ns/fcs/layer/word");
-//        URI lemmaLayerId = URI.create("http://spraakbanken.gu.se/ns/fcs/layer/lemma");
-//        URI posLayerId = URI.create("http://spraakbanken.gu.se/ns/fcs/layer/pos");
+        AdvancedDataViewWriter helper =
+                new AdvancedDataViewWriter(AdvancedDataViewWriter.Unit.ITEM);
+        URI wordLayerId = URI.create("http://spraakbanken.gu.se/ns/fcs/layer/word");
+        URI lemmaLayerId = URI.create("http://spraakbanken.gu.se/ns/fcs/layer/lemma");
+        URI posLayerId = URI.create("http://spraakbanken.gu.se/ns/fcs/layer/pos");
 
-        URI wordLayerId = URI.create("http://ilc4clarin.ilc.cnr.it/services/fcs/layer/word");
-        URI lemmaLayerId = URI.create("http://ilc4clarin.ilc.cnr.it/services/fcs/layer/lemma");
-        URI posLayerId = URI.create("http://ilc4clarin.ilc.cnr.it/services/fcs/layer/pos");
+	Kwic kwic = resultSet.getKwic().get(currentRecordCursor - startRecord);
+	List<Token> tokens = kwic.getTokens();
+	Match match = kwic.getMatch();
+	String corpus = kwic.getCorpus();
 
-        Kwic kwic = resultSet.getKwic().get(currentRecordCursor - startRecord);
-        List<Token> tokens = kwic.getTokens();
-        Match match = kwic.getMatch();
-        String corpus = kwic.getCorpus();
-
-        String tagset = Utilities.getTagSetFromCorpus(kssrsProp, corpus);
-        POSTranslator posTranslator = null;
-        String logMess = "";
-        try {
-            posTranslator = POSTranslatorFactory.getPOSTranslator(tagset);
-
-        } catch (SRUException ex) {
-            java.util.logging.Logger.getLogger(KorpSRUSearchResultSet.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() for corpus '{}'", corpus);
-        XMLStreamWriterHelper.writeStartResource(writer, corpus + "-" + match.getPosition(), null);
+	XMLStreamWriterHelper.writeStartResource(writer, corpus + "-" + match.getPosition(), null);
         XMLStreamWriterHelper.writeStartResourceFragment(writer, null, null);
 
-        long start = 1;
-        if (match.getStart() != 1) {
-
+	long start = 1;
+	if (match.getStart() != 1) {
             for (int i = 0; i < match.getStart(); i++) {
-
-                long end = start + tokens.get(i).getWord().length();
+		long end = start + tokens.get(i).getWord().length();
                 helper.addSpan(wordLayerId, start, end, tokens.get(i).getWord());
-                try {
-
-                    //helper.addSpan(posLayerId, start, end, SUCTranslator.fromSUC(tokens.get(i).getMsd()).get(0));
-                    helper.addSpan(posLayerId, start, end, posTranslator.fromPos(tokens.get(i).getPos()).get(0));
-                } catch (SRUException se) {
-                    posTranslator.getClass().getCanonicalName();
-                    // LOG.debug("pos '{}' not found for corpus "+corpus+"",tokens.get(i).getPos());
-                    logMess = " For POSTransalator " + posTranslator.getClass().getCanonicalName();
-                    LOG.info("Error '{}'", se.getDiagnostic().getMessage() + logMess);
-                    //System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() Error '{}'" + se.getDiagnostic().getMessage() + logMess);
-
-                }
-                try {
-
-                    helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma());
-                    start = end + 1;
-                } catch (Exception se) {
-                    //System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() Error '{}'" + se.getMessage() + logMess);
-                    LOG.info("Error '{}'", se.getMessage());
-                }
-
+		try {
+		    helper.addSpan(posLayerId, start, end, SUCTranslator.fromSUC(tokens.get(i).getMsd()).get(0));
+		} catch (SRUException se) {}
+		helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma());
+                start = end + 1;
             }
-        } else {
-            //System.out.println("DUNNO se.gu.spraakbanken.fcs.endpoint.korp.KorpSRUSearchResultSet.writeRecord() " + corpus);
         }
 
         for (int i = match.getStart(); i < match.getEnd(); i++) {
-            long end = start + tokens.get(i).getWord().length();
+	    long end = start + tokens.get(i).getWord().length();
             helper.addSpan(wordLayerId, start, end, tokens.get(i).getWord(), 1);
-            try {
-                helper.addSpan(posLayerId, start, end, posTranslator.fromPos(tokens.get(i).getPos()).get(0), 1);
-
-            } catch (SRUException se) {
-                logMess = " For POSTransalator " + posTranslator.getClass().getCanonicalName();
-                LOG.info("Error '{}'", se.getDiagnostic().getMessage() + logMess);
-
-            }
-            try {
-                helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma(), 1);
-                start = end + 1;
-            } catch (Exception se) {
-
-                LOG.info("Error '{}'", se.getMessage());
-            }
+	    try {
+		helper.addSpan(posLayerId, start, end, SUCTranslator.fromSUC(tokens.get(i).getMsd()).get(0), 1);
+	    } catch (SRUException se) {}
+	    helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma(), 1);
+	    start = end + 1;
         }
 
         if (tokens.size() > match.getEnd()) {
             for (int i = match.getEnd(); i < tokens.size(); i++) {
-                long end = start + tokens.get(i).getWord().length();
+		long end = start + tokens.get(i).getWord().length();
                 helper.addSpan(wordLayerId, start, end, tokens.get(i).getWord());
-                try {
-                    helper.addSpan(posLayerId, start, end, posTranslator.fromPos(tokens.get(i).getPos()).get(0));
-                } catch (SRUException se) {
-                }
-                helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma());
+		try {
+		    helper.addSpan(posLayerId, start, end, SUCTranslator.fromSUC(tokens.get(i).getMsd()).get(0));
+	    } catch (SRUException se) {}
+		helper.addSpan(lemmaLayerId, start, end, tokens.get(i).getLemma());
                 start = end + 1;
             }
         }
 
         helper.writeHitsDataView(writer, wordLayerId);
-        if (request == null || request.isQueryType(Constants.FCS_QUERY_TYPE_FCS)) {
+	if (request == null || request.isQueryType(Constants.FCS_QUERY_TYPE_FCS)) {
             helper.writeAdvancedDataView(writer);
         }
 
@@ -487,29 +333,29 @@ public class KorpSRUSearchResultSet extends SRUSearchResultSet {
      * The default implementation returns <code>false</code>.
      *
      * @return <code>true</code> if the record has extra record data
-     * @throws NoSuchElementException result set is already advanced past all
-     * records
+     * @throws NoSuchElementException
+     *             result set is already advanced past all records
      * @see #writeExtraResponseData(XMLStreamWriter)
      */
     public boolean hasExtraRecordData() {
         return false;
     }
 
+
     /**
      * Serialize extra record data for the current record. A no-op default
      * implementation is provided for convince.
      *
-     * @param writer the {@link XMLStreamException} instance to be used
-     * @throws XMLStreamException an error occurred while serializing the result
-     * extra data
-     * @throws NoSuchElementException result set past already advanced past all
-     * records
+     * @param writer
+     *            the {@link XMLStreamException} instance to be used
+     * @throws XMLStreamException
+     *             an error occurred while serializing the result extra data
+     * @throws NoSuchElementException
+     *             result set past already advanced past all records
      * @see #hasExtraRecordData()
      */
     public void writeExtraRecordData(XMLStreamWriter writer)
             throws XMLStreamException {
     }
-
-    
 
 }

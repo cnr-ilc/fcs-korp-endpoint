@@ -16,22 +16,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import se.gu.spraakbanken.fcs.endpoint.korp.utils.ManageProperties;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "corpora",
-    "time",
-    "total_sentences",
-    "total_size"
+	"corpora",
+	"time",
+	"total_sentences",
+	"total_size"
 })
 public class CorporaInfo {
 
@@ -46,16 +40,13 @@ public class CorporaInfo {
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    private static final Logger LOG
-            = LoggerFactory.getLogger(CorporaInfo.class);
-
     /**
      *
      * @param corpusId The corpusId
      * @return Corpus The Corpus with ID corpusId
      */
     public Corpus getCorpus(final String corpusId) {
-        return corpora.get(corpusId);
+	return corpora.get(corpusId);
     }
 
     /**
@@ -64,16 +55,17 @@ public class CorporaInfo {
      * @param corpus The Corpus for corpus corpusId
      */
     public void setCorpus(final String corpusId, final Corpus corpus) {
-        corpora.put(corpusId, corpus);
+	corpora.put(corpusId, corpus);
     }
 
     /**
      *
-     * @return The corpora
+     * @return
+     * The corpora
      */
     @JsonProperty("corpora")
     public Map<String, Corpus> getCorpora() {
-        return corpora;
+	return corpora;
     }
 
     /**
@@ -82,16 +74,17 @@ public class CorporaInfo {
      */
     @JsonProperty("corpora")
     public void setCorpora(final Map<String, Corpus> corpora) {
-        this.corpora = corpora;
+	this.corpora = corpora;
     }
 
     /**
      *
-     * @return The time
+     * @return
+     * The time
      */
     @JsonProperty("time")
     public Double getTime() {
-        return time;
+	return time;
     }
 
     /**
@@ -100,16 +93,17 @@ public class CorporaInfo {
      */
     @JsonProperty("time")
     public void setTime(Double time) {
-        this.time = time;
+	this.time = time;
     }
 
     /**
      *
-     * @return The totalSentences
+     * @return
+     * The totalSentences
      */
     @JsonProperty("total_sentences")
     public Integer getTotalSentences() {
-        return totalSentences;
+	return totalSentences;
     }
 
     /**
@@ -118,7 +112,7 @@ public class CorporaInfo {
      */
     @JsonProperty("total_sentences")
     public void setTotalSentences(Integer totalSentences) {
-        this.totalSentences = totalSentences;
+	this.totalSentences = totalSentences;
     }
 
     /**
@@ -127,7 +121,7 @@ public class CorporaInfo {
      */
     @JsonProperty("total_size")
     public Integer getTotalSize() {
-        return totalSize;
+	return totalSize;
     }
 
     /**
@@ -136,38 +130,35 @@ public class CorporaInfo {
      */
     @JsonProperty("total_size")
     public void setTotalSize(Integer totalSize) {
-        this.totalSize = totalSize;
+	this.totalSize = totalSize;
     }
 
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
-        return this.additionalProperties;
+	return this.additionalProperties;
     }
 
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
-        this.additionalProperties.put(name, value);
+	this.additionalProperties.put(name, value);
     }
 
     /**
-     * Added the property file
      *
      * @param corpora The List&lt;String&gt; corpora values.
      *
      * @return a CorporaInfo instance for all corpora
      */
     public static CorporaInfo getCorporaInfo(final List<String> corpora) {
-
         ObjectMapper mapper = new ObjectMapper();
 
-        CorporaInfo ci = null;
-        final String wsString = "https://spraakbanken.gu.se/ws/korp/v6/?";
-        final String queryString = "command=info&corpus=";
-
-        //"ROMI,PAROLE";
-        final String corporaValues = getCorpusParameterValues(corpora);
+	CorporaInfo ci = null;
+	final String wsString ="https://spraakbanken.gu.se/ws/korp/v6/?";
+	final String queryString = "command=info&corpus=";
+	//"ROMI,PAROLE";
+	final String corporaValues = getCorpusParameterValues(corpora);
         try {
-            URL korp = new URL(wsString + queryString + corporaValues);
+	    URL korp = new URL(wsString + queryString + corporaValues);
 
             ci = mapper.reader(CorporaInfo.class).readValue(korp.openStream());
         } catch (JsonParseException e) {
@@ -183,52 +174,7 @@ public class CorporaInfo {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        return ci;
-    }
-
-    /**
-     * Added the property file
-     *
-     * @param corpora The List&lt;String&gt; corpora values.
-     *
-     * @return a CorporaInfo instance for all corpora
-     */
-    public static CorporaInfo getIlc4ClarinCorporaInfo(Properties prop, final List<String> corpora) {
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        final String wsString = ManageProperties.createKorpUrl(prop);
-        final String queryString = "info?&corpus=";
-        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getIlc4ClarinCorporaInfo() " + wsString);
-        
-        CorporaInfo ci = null;
-//	final String wsString ="https://spraakbanken.gu.se/ws/korp/v6/?";
-//	final String queryString = "command=info&corpus=";
-
-        //"ROMI,PAROLE";
-        LOG.info("URL '{}'", wsString + queryString);
-        final String corporaValues = getCorpusParameterValues(corpora);
-        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.getIlc4ClarinCorporaInfo() " + corporaValues);
-        
-        try {
-            URL korp = new URL(wsString + queryString + corporaValues);
-
-            ci = mapper.readerFor(CorporaInfo.class).readValue(korp.openStream());
-        } catch (JsonParseException e) {
-
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (JsonMappingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return ci;
+	return ci;
     }
 
     /**
@@ -238,43 +184,17 @@ public class CorporaInfo {
      * @return a comma separated String
      */
     public static String getCorpusParameterValues(Collection<String> values) {
-        StringBuffer buf = new StringBuffer();
-        boolean first = true;
-        for (String key : values) {
-            if (first) {
-                first = false;
-            } else {
-                buf.append(",");
-            }
-            buf.append(key);
-        }
-        return buf.toString();
-    }
-
-    public static CorporaInfo selectedCorporaInfo(Properties prop, String sources) {
-        String temp = prop.getProperty("CTX2CORPORA");
-        List<String> sourceList = Collections.unmodifiableList(Arrays.asList(sources.split(",")));
-        List<String> mappedList = Collections.unmodifiableList(Arrays.asList(temp.split(",")));
-        Map<String, String> map = new HashMap<String, String>();
-        List<String> ret = new ArrayList<String>();
-        String ctx, corpus;
-        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.selectedCorporaInfo() "+sources);
-        System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.selectedCorporaInfo() "+mappedList);
-        for (String mapped : mappedList) {
-            ctx = mapped.split("=")[0];
-            corpus = mapped.split("=")[1];
-            //System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.data.json.pojo.info.CorporaInfo.selectedCorporaInfo() Inserting key "+ctx+ " with value "+corpus);
-            map.put(ctx, corpus);
-     
-        }
-        
-        for (String source : sourceList) {
-            String sc=map.get(source);
-            
-            ret.add(sc);
-        }
-
-        return getIlc4ClarinCorporaInfo(prop, ret);
+	StringBuffer buf = new StringBuffer();
+	boolean first = true;
+	for (String key : values) {
+	    if (first) { 
+		first = false;
+	    } else { 
+		buf.append(",");
+	    }
+	    buf.append(key);
+	}
+	return buf.toString();
     }
 
 }
