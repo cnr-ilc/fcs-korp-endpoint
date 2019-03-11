@@ -40,6 +40,12 @@
       <organization>Språkbanken</organization>
       <url>https://spraakbanken.gu.se/</url>
     </developer>
+    <developer>
+      <id>ljo</id>
+      <name>Riccardo Del Gratta</name>
+      <organization>CNR-ILC</organization>
+      <url>http://www.ilc.cnr.it</url>
+    </developer>
   </developers>
   <dependencies>
     <dependency>

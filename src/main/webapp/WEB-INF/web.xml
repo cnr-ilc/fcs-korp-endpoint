@@ -16,7 +16,8 @@
     </init-param>
     <init-param>
       <param-name>eu.clarin.sru.server.propertyFile</param-name>
-      <param-value>/opt/java/app/ilc4clarin-fcs-korp-endpoint/config-endpoint.properties</param-value>
+      <param-value>/korp_ep_at_ilc4clarin/config-endpoint.properties</param-value>
+<!--      <param-value>/opt/java/app/ilc4clarin-fcs-korp-endpoint/config-endpoint.properties</param-value>-->
     </init-param>
     <init-param>
       <param-name>eu.clarin.sru.server.maximumRecords</param-name>
