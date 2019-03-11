@@ -1,7 +1,8 @@
 /**
  * Forked from https://github.com/clarin-eric/fcs-korp-endpoint
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- *  GNU General Public License v3
+ *
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt GNU General Public License
+ * v3
  */
 package se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp;
 
@@ -48,7 +49,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.clarin.sru.server.SRUServer;
 import java.util.Properties;
 
-
 import se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.cqp.Ilc4ClarinFCSToCQPConverter;
 import se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.data.json.pojo.info.CorporaInfo;
 import se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.data.json.pojo.info.ServiceInfo;
@@ -58,15 +58,16 @@ import se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.utils.ReadExternalPropFil
 
 /**
  * A Korp CLARIN FCS 2.0 IL4CLARIN endpoint.
- * 
+ *
  * In addition to KorpEndpointSearchEngine it adds an external property file
- * which is used to make the EP configurable in terms of corpora to make available, different pos tagsets
- * The propertyfile is passed to the servlet in the web.xml file
- * 
+ * which is used to make the EP configurable in terms of corpora to make
+ * available, different pos tagsets The propertyfile is passed to the servlet in
+ * the web.xml file
+ *
  * @author Riccardo Del Gratta &lt;riccardo.delgratta@ilc.cnr.it|gmail.com&gt;
  */
 public class Ilc4ClarinKorpEndpointSearchEngine extends SimpleEndpointSearchEngineBase {
-    
+
     private static final String X_FCS_ENDPOINT_DESCRIPTION
             = "x-fcs-endpoint-description";
     private static final String ED_NS
@@ -131,7 +132,7 @@ public class Ilc4ClarinKorpEndpointSearchEngine extends SimpleEndpointSearchEngi
      * @param queryParserBuilder the {@link SRUQueryParserRegistry.Builder}
      * object to be used for this search engine. Use to register additional
      * query parsers with the {@link SRUServer}.
-     * @param params  additional parameters gathered from the Servlet
+     * @param params additional parameters gathered from the Servlet
      * configuration and Servlet context.
      * @throws SRUConfigException if an error occurred
      */
@@ -141,8 +142,7 @@ public class Ilc4ClarinKorpEndpointSearchEngine extends SimpleEndpointSearchEngi
         Properties prop = new Properties();
         LOG.info("KorpEndpointSearchEngine::doInit {}", config.getPort());
         LOG.debug("Config Parameters" + " " + params);
-        
-       
+
         try {
             //Properties prop = ReadExternalPropFiles.getPropertyFile(System.getProperty("user.dir") + "/target/test-classes/se/gu/spraakbanken/fcs/endpoint/korp/config-test.properties");
             prop = ReadExternalPropFiles.getPropertyFile(params.get("eu.clarin.sru.server.propertyFile"));
@@ -152,10 +152,11 @@ public class Ilc4ClarinKorpEndpointSearchEngine extends SimpleEndpointSearchEngi
             //e.printStackTrace();
         }
         setKeseProp(prop);
+        //System.err.println("KorpEndpointSearchEngine::doInit ILC4CLARIN_CORPORA "+prop.getProperty("ILC4CLARIN_CORPORA"));
         List<String> openCorpora = ServiceInfo.getIlc4ClarinCorpora(prop);
-        System.err.println("KorpEndpointSearchEngine::doInit openCorpora "+openCorpora);
+
         openCorporaInfo = CorporaInfo.getIlc4ClarinCorporaInfo(prop, openCorpora);
-       
+        //System.err.println("KorpEndpointSearchEngine::doInit openCorpora "+openCorporaInfo.getCorpora().keySet());
     }
 
     /**
@@ -388,14 +389,15 @@ public class Ilc4ClarinKorpEndpointSearchEngine extends SimpleEndpointSearchEngi
         }
     }
 
-   
     /**
-     * Handle a <em>searchRetrieve</em> operation. 
-     * Briefly it does:
+     * Handle a <em>searchRetrieve</em> operation. Briefly it does:
      * <ul>
-     * <li>Fix the context from URL: if some corpora are sent from the aggregator, only those are searched</li>
-     * <li>Fix the context from URL: if some corpora are sent from the aggregator, only those are searched</li>
+     * <li>Fix the context from URL: if some corpora are sent from the
+     * aggregator, only those are searched</li>
+     * <li>Fix the context from URL: if some corpora are sent from the
+     * aggregator, only those are searched</li>
      * </ul>
+     *
      * @param config the <code>SRUEndpointConfig</code> object that contains the
      * endpoint configuration
      * @param request the <code>SRURequest</code> object that contains the
@@ -411,8 +413,10 @@ public class Ilc4ClarinKorpEndpointSearchEngine extends SimpleEndpointSearchEngi
             throws SRUException {
         CorporaInfo contextedCorpora = new CorporaInfo();
         String query;
+
         boolean hasFcsContextCorpus = false;
         String fcsContextCorpus = "";
+        //System.out.println("SEARCH se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.Ilc4ClarinKorpEndpointSearchEngine.search() -" + request.getQuery().getRawQuery() + "-");
         for (String erd : request.getExtraRequestDataNames()) {
             if ("x-fcs-context".equals(erd)) {
                 hasFcsContextCorpus = true;
@@ -421,7 +425,7 @@ public class Ilc4ClarinKorpEndpointSearchEngine extends SimpleEndpointSearchEngi
                 break;
             }
         }
-        
+
         // fix context
         if (hasFcsContextCorpus && !"".equals(fcsContextCorpus)) {
 
@@ -442,8 +446,7 @@ public class Ilc4ClarinKorpEndpointSearchEngine extends SimpleEndpointSearchEngi
 
             contextedCorpora = openCorporaInfo;
         }
-        
-        
+
         if (request.isQueryType(Constants.FCS_QUERY_TYPE_CQL)) {
             /*
              * Got a CQL query (either SRU 1.1 or higher).
@@ -451,8 +454,12 @@ public class Ilc4ClarinKorpEndpointSearchEngine extends SimpleEndpointSearchEngi
              */
             final CQLQueryParser.CQLQuery q
                     = request.getQuery(CQLQueryParser.CQLQuery.class);
-            
+
             query = Ilc4ClarinFCSToCQPConverter.makeCQPFromCQL(q);
+            try {
+                query = URLEncoder.encode(query, "UTF-8");
+            } catch (Exception e) {
+            }
         } else if (request.isQueryType(Constants.FCS_QUERY_TYPE_FCS)) {
             /*
              * Got a FCS query (SRU 2.0).
@@ -471,8 +478,8 @@ public class Ilc4ClarinKorpEndpointSearchEngine extends SimpleEndpointSearchEngi
                     + request.getQueryType()
                     + "' are not supported by this CLARIN-FCS Endpoint.");
         }
-        
-        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() '{}'",query);
+
+        LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.search() '{}'", query);
 
         Query queryRes = makeIlc4ClarinQuery(getKeseProp(), query, contextedCorpora, request.getStartRecord(), request.getMaximumRecords());
         if (queryRes == null) {
@@ -482,17 +489,18 @@ public class Ilc4ClarinKorpEndpointSearchEngine extends SimpleEndpointSearchEngi
         }
         Ilc4ClarinKorpSRUSearchResultSet kssrs = new Ilc4ClarinKorpSRUSearchResultSet(config, request, diagnostics, queryRes, query, contextedCorpora); //openCorporaInfo);
         kssrs.setKssrsProp(keseProp);
-        
+
         return kssrs; //new Ilc4ClarinKorpSRUSearchResultSet(config, request, diagnostics, queryRes, query, openCorporaInfo);
     }
 
-    
     /**
-     * Executes the query on the Backend Search Engine 
+     * Executes the query on the Backend Search Engine
+     *
      * @param prop the Property File
      * @param cqpQuery The query in CQP
-     * @param openCorporaInfo The corpora on which a searchRetieve operation is performed
-     * @param startRecord 
+     * @param openCorporaInfo The corpora on which a searchRetieve operation is
+     * performed
+     * @param startRecord
      * @param maximumRecords
      * @return a {@link Query}
      */
@@ -500,7 +508,7 @@ public class Ilc4ClarinKorpEndpointSearchEngine extends SimpleEndpointSearchEngi
         ObjectMapper mapper = new ObjectMapper();
         //System.out.println("****** se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() " + cqpQuery);
         LOG.info("se.gu.spraakbanken.fcs.endpoint.korp.KorpEndpointSearchEngine.makeIlc4ClarinQuery() '{}'", cqpQuery);
-        
+
         String wsString = ManageProperties.createKorpUrl(prop);//"https://spraakbanken.gu.se/ws/korp/v6/?";
         String queryString = "query?defaultcontext=1+sentence&show=msd,lemma,pos&cqp=";
         String startParam = "&start=" + (startRecord == 1 ? 0 : startRecord - 1);
@@ -536,7 +544,7 @@ public class Ilc4ClarinKorpEndpointSearchEngine extends SimpleEndpointSearchEngi
     protected CorporaInfo getCorporaInfo() {
         return openCorporaInfo;
     }
-    
+
     /**
      * @return the keseProp
      */

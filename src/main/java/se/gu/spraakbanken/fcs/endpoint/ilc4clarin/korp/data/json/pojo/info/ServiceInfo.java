@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URLEncoder;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,24 +166,29 @@ public class ServiceInfo {
         ObjectMapper mapper = new ObjectMapper();
 
         final String wsString = ManageProperties.createKorpUrl(prop);
+        //System.err.println("KORPURL "+wsString);
         final String queryString = "info";
 
-        LOG.debug("se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.data.json.pojo.info.ServiceInfo.getIlc4ClarinOpenCorpora() query '{}'", wsString + queryString);
+        LOG.info("se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.data.json.pojo.info.ServiceInfo.getIlc4ClarinOpenCorpora() query '{}'", wsString + queryString);
         ServiceInfo si = null;
 
         try {
-            URL korp = new URL(wsString + queryString);
+            String enc=URLEncoder.encode(queryString,"UTF-8");
+            URL korp = new URL(wsString + enc);
             si = mapper.readerFor(ServiceInfo.class).readValue(korp.openStream());
 
         } catch (JsonParseException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.err.println("ServiceInfo.getIlc4ClarinOpenCorpora() KORPURLJSONPARSER "+e.getMessage());
+            //e.printStackTrace();
         } catch (JsonMappingException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+           // e.printStackTrace();
+           System.err.println("ServiceInfo.getIlc4ClarinOpenCorpora() KORPURLJSONMAPPING "+e.getMessage());
         } catch (MalformedURLException e) {
+            System.err.println("ServiceInfo.getIlc4ClarinOpenCorpora() KORPURLMalformedURLException "+e.getMessage());
             // TODO Auto-generated catch block
-            e.printStackTrace();
+           // e.printStackTrace();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
