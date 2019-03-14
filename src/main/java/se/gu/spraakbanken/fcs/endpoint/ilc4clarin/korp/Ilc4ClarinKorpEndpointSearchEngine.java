@@ -456,10 +456,10 @@ public class Ilc4ClarinKorpEndpointSearchEngine extends SimpleEndpointSearchEngi
                     = request.getQuery(CQLQueryParser.CQLQuery.class);
 
             query = Ilc4ClarinFCSToCQPConverter.makeCQPFromCQL(q);
-            try {
-                query = URLEncoder.encode(query, "UTF-8");
-            } catch (Exception e) {
-            }
+//            try {
+//                query = URLEncoder.encode(query, "UTF-8");
+//            } catch (Exception e) {
+//            }
         } else if (request.isQueryType(Constants.FCS_QUERY_TYPE_FCS)) {
             /*
              * Got a FCS query (SRU 2.0).

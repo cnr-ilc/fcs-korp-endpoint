@@ -173,22 +173,22 @@ public class ServiceInfo {
         ServiceInfo si = null;
 
         try {
-            String enc=URLEncoder.encode(queryString,"UTF-8");
-            URL korp = new URL(wsString + enc);
+            //String enc=URLEncoder.encode(queryString,"UTF-8");
+            URL korp = new URL(wsString + queryString);
             si = mapper.readerFor(ServiceInfo.class).readValue(korp.openStream());
 
         } catch (JsonParseException e) {
             // TODO Auto-generated catch block
-            System.err.println("ServiceInfo.getIlc4ClarinOpenCorpora() KORPURLJSONPARSER "+e.getMessage());
-            //e.printStackTrace();
+            //System.err.println("ServiceInfo.getIlc4ClarinOpenCorpora() KORPURLJSONPARSER "+e.getMessage());
+            e.printStackTrace();
         } catch (JsonMappingException e) {
             // TODO Auto-generated catch block
-           // e.printStackTrace();
-           System.err.println("ServiceInfo.getIlc4ClarinOpenCorpora() KORPURLJSONMAPPING "+e.getMessage());
+            e.printStackTrace();
+            //System.err.println("ServiceInfo.getIlc4ClarinOpenCorpora() KORPURLJSONMAPPING "+e.getMessage());
         } catch (MalformedURLException e) {
-            System.err.println("ServiceInfo.getIlc4ClarinOpenCorpora() KORPURLMalformedURLException "+e.getMessage());
+            //System.err.println("ServiceInfo.getIlc4ClarinOpenCorpora() KORPURLMalformedURLException "+e.getMessage());
             // TODO Auto-generated catch block
-           // e.printStackTrace();
+            e.printStackTrace();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -222,30 +222,29 @@ public class ServiceInfo {
     public static List<String> getIlc4ClarinCorpora(Properties prop) {
         List<String> filteredCorpora = new ArrayList<String>();
         List<String> openCorpora = ServiceInfo.getIlc4ClarinOpenCorpora(prop);
-        
-         List<String> corporaFromFile = null;
-        String ilc4ClarinCorpora = prop.getProperty("ILC4CLARIN_CORPORA");
-        if (ilc4ClarinCorpora == null || ilc4ClarinCorpora.length()==0 ){
-            return openCorpora;
-        } else{
-        
-       
-        if (ilc4ClarinCorpora.split(",").length == 1) {
-            corporaFromFile = Collections.unmodifiableList(Arrays.asList(ilc4ClarinCorpora));
-        } else {
-            corporaFromFile = Collections.unmodifiableList(Arrays.asList(ilc4ClarinCorpora.split(",")));
-        }
-        //System.err.println("  getIlc4ClarinCorpora "+corporaFromFile+ " "+openCorpora);
 
-        // sets available corpora. This filters out potential test corpora in the korp backend
-        setILC4CLARIN_CORPORA(corporaFromFile);
-        LOG.debug("se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.data.json.pojo.info.ServiceInfo.getIlc4ClarinCorpora() corpora from file '{}'", ilc4ClarinCorpora);
-        for (String corpus : openCorpora) {
-            if (getILC4CLARIN_CORPORA().contains(corpus)) {
-                filteredCorpora.add(corpus);
+        List<String> corporaFromFile = null;
+        String ilc4ClarinCorpora = prop.getProperty("ILC4CLARIN_CORPORA");
+        if (ilc4ClarinCorpora == null || ilc4ClarinCorpora.length() == 0) {
+            return openCorpora;
+        } else {
+
+            if (ilc4ClarinCorpora.split(",").length == 1) {
+                corporaFromFile = Collections.unmodifiableList(Arrays.asList(ilc4ClarinCorpora));
+            } else {
+                corporaFromFile = Collections.unmodifiableList(Arrays.asList(ilc4ClarinCorpora.split(",")));
             }
-        }
-        LOG.debug("se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.data.json.pojo.info.ServiceInfo.getIlc4ClarinCorpora() filtered '{}'", filteredCorpora);
+            //System.err.println("  getIlc4ClarinCorpora "+corporaFromFile+ " "+openCorpora);
+
+            // sets available corpora. This filters out potential test corpora in the korp backend
+            setILC4CLARIN_CORPORA(corporaFromFile);
+            LOG.debug("se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.data.json.pojo.info.ServiceInfo.getIlc4ClarinCorpora() corpora from file '{}'", ilc4ClarinCorpora);
+            for (String corpus : openCorpora) {
+                if (getILC4CLARIN_CORPORA().contains(corpus)) {
+                    filteredCorpora.add(corpus);
+                }
+            }
+            LOG.debug("se.gu.spraakbanken.fcs.endpoint.ilc4clarin.korp.data.json.pojo.info.ServiceInfo.getIlc4ClarinCorpora() filtered '{}'", filteredCorpora);
         }
         return filteredCorpora;
     }
