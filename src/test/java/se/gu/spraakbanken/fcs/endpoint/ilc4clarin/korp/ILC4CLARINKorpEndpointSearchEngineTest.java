@@ -88,7 +88,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
     @BeforeClass
     public static void parseEndpointDescription() throws SRUConfigException {
         try {;
-            sed = SimpleEndpointDescriptionParser.parse(new File("target/test-classes/se/gu/spraakbanken/fcs/endpoint/korp/endpoint-description-test.xml").toURI().toURL());
+            sed = SimpleEndpointDescriptionParser.parse(new File("target/test-classes/se/gu/spraakbanken/fcs/endpoint/korp/ilc4clarin-korp-endpoint-description-test.xml").toURI().toURL());
             //sed = SimpleEndpointDescriptionParser.parse(new File("target/test-classes/se/gu/spraakbanken/fcs/endpoint/korp/endpoint-description_orig.xml").toURI().toURL());
             assertEquals("http://clarin.eu/fcs/capability/basic-search", sed.getCapabilities().get(0).toString());
             assertEquals("http://clarin.eu/fcs/capability/advanced-search", sed.getCapabilities().get(1).toString());
@@ -109,7 +109,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         params.put(SRUServerConfig.SRU_PORT, "8082");
         params.put(SRUServerConfig.SRU_DATABASE, "sru-server");
         params.put(SRUServerServlet.SRU_SERVER_CONFIG_LOCATION_PARAM, "src/main/webapp/WEB-INF/sru-server-config.xml");
-        params.put("eu.clarin.sru.server.propertyFile", "/opt/java/app/ilc4clarin-fcs-korp-endpoint/config-endpoint.properties");
+        params.put("eu.clarin.sru.server.propertyFile", "/opt/java/app/ilc4clarin-fcs-korp-endpoint/config-endpoint_1.properties");
 
         // try {
         //     String baseUrl = tester.createSocketConnector(true);
@@ -193,7 +193,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
 
     @Test
     public void listResourcesFromPid() throws SRUException {
-        String pid = "hdl:20.500.11752/corpora";//hdl:20.500.11752/corpora";
+        String pid = "hdl:20.500.11752/it-treebanks";//hdl:20.500.11752/corpora";
         List<ResourceInfo> riList = sed.getResourceList(pid);
         for (ResourceInfo ri : riList) {
             System.out.println("ResourceInfo with PID " + ri.getPid() + " has title " + ri.getTitle());
@@ -212,7 +212,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
     @Test
     public void getResourcesFromDescription() throws SRUException {
         //List<ResourceInfo> riList = sed.getResourceList("hdl:20.500.11752/parole"); //hdl:10794/sbmoderna
-        List<ResourceInfo> riList = sed.getResourceList("hdl:20.500.11752/corpora");
+        List<ResourceInfo> riList = sed.getResourceList("hdl:20.500.11752/it-treebanks");
         if (riList == null) {
 
             System.out.println("ResourceInfo list is null ");
@@ -223,7 +223,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         assertEquals("hits", riList.get(0).getAvailableDataViews().get(0).getIdentifier());
         assertEquals("SEND_BY_DEFAULT", riList.get(0).getAvailableDataViews().get(0).getDeliveryPolicy().toString());
         assertEquals("application/x-clarin-fcs-hits+xml", riList.get(0).getAvailableDataViews().get(0).getMimeType());
-        assertEquals("http://ilc4clarin.ilc.cnr.it/corpora/parole", riList.get(0).getLandingPageURI());
+        assertEquals("http://ilc4clarin.ilc.cnr.it/en/ud-italian-istd", riList.get(0).getLandingPageURI());
         assertTrue(riList.get(0).hasAvailableLayers());
         assertEquals("word", riList.get(0).getAvailableLayers().get(0).getId());
         assertEquals("text", riList.get(0).getAvailableLayers().get(0).getType());
@@ -414,7 +414,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         //SRURequest request = new SRURequestImpl(config, queryParsers, new HttpServletRequestWrapper());
         //SRUSearchResultSet ssrs = kese.search(config, request, diagnostics);
         Properties prop = kese.getKeseProp();
-        CorporaInfo ci = CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/parole");
+        CorporaInfo ci = CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/ud-italian-istd");
         System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.selectedCorporaInfo() " + ci.getCorpora());
 
         final String query = "[ word = 'dispersa' & pos = 'AQ0FS00' ]";//"[word = 'dispersa'][word != 'sono']";
@@ -516,7 +516,7 @@ public class ILC4CLARINKorpEndpointSearchEngineTest {
         params.put("query", queryGroupAnd);
         Properties prop = kese.getKeseProp();
        
-        CorporaInfo ci = CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/riccardo,hdl:20.500.11752/parole");
+        CorporaInfo ci = CorporaInfo.selectedCorporaInfo(prop, "hdl:20.500.11752/parole_istd,hdl:20.500.11752/parole_pud");
         
         System.out.println("se.gu.spraakbanken.fcs.endpoint.korp.ILC4CLARINKorpEndpointSearchEngineTest.ilc4ClarinTestConvertQuery() " + ci.getCorpora());
         //params.put("query", "[text = 'användning']");
