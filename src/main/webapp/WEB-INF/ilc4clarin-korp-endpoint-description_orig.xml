@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EndpointDescription xmlns="http://clarin.eu/fcs/endpoint-description"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                     xsi:schemaLocation="http://clarin.eu/fcs/endpoint-description ../../schema/Core_2/Endpoint-Description.xsd"
+                     version="2">
+    <Capabilities>
+        <Capability>http://clarin.eu/fcs/capability/basic-search</Capability>
+        <Capability>http://clarin.eu/fcs/capability/advanced-search</Capability>
+    </Capabilities>
+    <SupportedDataViews>
+        <SupportedDataView id="hits" delivery-policy="send-by-default">application/x-clarin-fcs-hits+xml</SupportedDataView>
+        <SupportedDataView id="adv" delivery-policy="send-by-default">application/x-clarin-fcs-adv+xml</SupportedDataView>
+        <SupportedDataView id="cmdi" delivery-policy="need-to-request">application/x-cmdi+xml</SupportedDataView>
+    </SupportedDataViews>
+    <SupportedLayers>
+        <SupportedLayer id="word" result-id="http://ilc4clarin.ilc.cnr.it/services/fcs/layer/word">text</SupportedLayer>
+        <SupportedLayer id="lemma" result-id="http://ilc4clarin.ilc.cnr.it/services/fcs/layer/lemma">lemma</SupportedLayer>
+        <SupportedLayer id="pos" result-id="http://ilc4clarin.ilc.cnr.it/services/fcs/layer/pos">pos</SupportedLayer>
+    </SupportedLayers>
+    <Resources>
+        <Resource pid="hdl:20.500.11752/corpora">
+            <Title xml:lang="it">Corpora offerti da ILC4CLARIN</Title>
+            <Title xml:lang="en">ILC4CLARIN offered corpora</Title>
+      
+            <LandingPageURI>http://ilc4clarin.ilc.cnr.it/corpora</LandingPageURI>
+            <Languages>
+                <Language>ita</Language>
+                <!--Language>fao</Language>
+                <Language>nld</Language>
+                <Language>som</Language>
+                <Language>spa</Language-->
+            </Languages>
+            <AvailableDataViews ref="hits adv"/>
+            <AvailableLayers ref="word lemma pos"/>
+            <Resources>
+                <Resource pid="hdl:20.500.11752/parole">
+                    <Title xml:lang="it">ILC4CLARIN Parole</Title>
+                    <Title xml:lang="en">ILC4CLARIN Parole corpus</Title>
+                    <Description xml:lang="it">ILC4CLARIN Parole. Estratto da...</Description>
+                    <Description xml:lang="en">ILC4CLARIN Parole corpus. Extracted from...</Description>
+                    <LandingPageURI>http://ilc4clarin.ilc.cnr.it/corpora/parole</LandingPageURI>
+                    <Languages>
+                        <Language>ita</Language>
+                    </Languages>
+                    <AvailableDataViews ref="hits adv"/>
+                    <AvailableLayers ref="word lemma pos"/>
+<!--                    <Resources>
+                        <Resource pid="hdl:10794/suc">
+                            <Title xml:lang="sv">SUC-korpusen</Title>
+                            <Title xml:lang="en">The SUC corpus</Title>
+                            <Description xml:lang="sv">Stockholm-Umeå-korpusen hos Språkbanken.</Description>
+                            <Description xml:lang="en">The Stockholm-Umeå corpus at Språkbanken.</Description>
+                            <LandingPageURI>https://spraakbanken.gu.se/resurser/suc</LandingPageURI>
+                            <Languages>
+                                <Language>swe</Language>
+                            </Languages>
+                            <AvailableDataViews ref="hits adv"/>
+                            <AvailableLayers ref="word lemma pos"/>
+                        </Resource>
+                    </Resources>-->
+                </Resource>
+<!--                <Resource pid="hdl:20.500.11752/riccardo">
+                    <Title xml:lang="it">ILC4CLARIN Riccardo</Title>
+                    <Title xml:lang="en">ILC4CLARIN Riccardo corpus</Title>
+                    <Description xml:lang="it">ILC4CLARIN Riccardo Estratto da...</Description>
+                    <Description xml:lang="en">ILC4CLARIN Riccardo corpus. Extracted from...</Description>
+                    <LandingPageURI>http://ilc4clarin.ilc.cnr.it/corpora/riccardo</LandingPageURI>
+                    <Languages>
+                        <Language>ita</Language>
+                    </Languages>
+                    <AvailableDataViews ref="hits"/>
+                    <AvailableLayers ref="word pos"/>
+                </Resource>-->
+            </Resources>
+        </Resource>
+    </Resources>
+</EndpointDescription>
